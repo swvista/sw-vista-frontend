@@ -10,7 +10,8 @@ import { MdCheckCircle, MdHistory } from "react-icons/md";
 import ProposalCard from "../proposals/ProposalCard";
 import VenueBookingRequestCard from "../venues/VenueBookingRequestCard";
 import EventDetails from "../../Components/EventDetails";
-import PageHeader from "../../Components/PageHeader"
+import PageHeader from "../../Components/PageHeader";
+import { useNavigate } from "react-router-dom";
 
 export default function FacultyDashboard() {
   // Example proposals array (you can map over this for multiple proposals)
@@ -48,7 +49,6 @@ export default function FacultyDashboard() {
 
   return (
     <div className="min-h-screen bg-[#faf8ff] flex p-10">
-
       <EventDetails
         request={{
           eventName: "Annual Tech Fest",
@@ -63,8 +63,7 @@ export default function FacultyDashboard() {
 
       <div className="w-full">
         {/* Top Bar */}
-        <PageHeader user={"Username"}/>
-
+        <PageHeader user={"Username"} />
 
         {/* Dashboard Title and Actions */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
@@ -148,11 +147,17 @@ function SummaryCard({ label, value, icon }) {
 
 // Section Card Wrapper
 function SectionCard({ title, children }) {
+  const navigate = useNavigate();
   return (
     <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-lg mb-2">{title}</h3>
-        <span className="text-xl bg-none p-2 cursor-pointer rounded text-purple-700 flex items-center">
+        <span
+          className="text-xl bg-none p-2 cursor-pointer rounded text-purple-700 flex items-center"
+          onClick={() => {
+            navigate("/venueBookingHistory");
+          }}
+        >
           <MdHistory />
           <p className="text-sm font-semibold pl-2">History</p>
         </span>

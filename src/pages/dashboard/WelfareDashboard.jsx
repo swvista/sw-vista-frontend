@@ -11,6 +11,7 @@ import ProposalCard from "../proposals/ProposalCard";
 import VenueBookingRequestCard from "../venues/VenueBookingRequestCard";
 import EventDetails from "../../Components/EventDetails";
 import PageHeader from "../../Components/PageHeader"
+import { useNavigate } from "react-router-dom";
 
 export default function WelfareDashboard() {
   // Example proposals array (you can map over this for multiple proposals)
@@ -146,11 +147,12 @@ function SummaryCard({ label, value, icon }) {
 
 // Section Card Wrapper
 function SectionCard({ title, children }) {
+  const navigate = useNavigate();
   return (
     <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-lg mb-2">{title}</h3>
-        <span className="text-xl bg-none p-2 cursor-pointer rounded text-purple-700 flex items-center">
+        <span className="text-xl bg-none p-2 cursor-pointer rounded text-purple-700 flex items-center" onClick={()=>navigate("/venueBookingHistory")}>
           <MdHistory />
           <p className="text-sm font-semibold pl-2">History</p>
         </span>
