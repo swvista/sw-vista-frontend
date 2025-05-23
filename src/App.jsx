@@ -16,6 +16,7 @@ import VenueBookingHistory from "./pages/venues/VenueBookingHistory";
 import SecurityDashboard from "./pages/dashboard/SecurityDashboard";
 import FacultyDashboard from "./pages/dashboard/FacultyDashboard";
 import WelfareDashboard from "./pages/dashboard/WelfareDashboard";
+import UserManagement from "./pages/UserManagement";
 
 function App() {
   return (
@@ -32,6 +33,9 @@ function App() {
             <Route path="/securityDashboard" element={<SecurityDashboard />} />
             <Route path="/facultyDashboard" element={<FacultyDashboard />} />
             <Route path="/welfareDashboard" element={<WelfareDashboard />} />
+
+            <Route path="/users" element={<UserManagement />} />
+
 
 
             <Route path="/venues" element={<VenuePage />} />
