@@ -115,7 +115,7 @@ export default function VenueBookingHistory() {
   const getVenueById = (venueId) => venues.find((v) => v.id === venueId);
 
   return (
-    <div className="space-y-8 p-10 mx-auto">
+    <div className="space-y-8 p-10 mx-auto max-sm:p-5">
       {/* Header */}
       <PageHeader user={"Username"}/>
       <h2 className="text-2xl font-bold mb-2">Venue Booking History</h2>

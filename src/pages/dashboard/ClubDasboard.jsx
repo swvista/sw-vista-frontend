@@ -9,6 +9,7 @@ import React from "react";
 import { MdCheckCircle, MdHistory } from "react-icons/md";
 import ProposalCard from "../proposals/ProposalCard";
 import VenueBookingRequestCard from "../venues/VenueBookingRequestCard";
+import PageHeader from "../../Components/PageHeader";
 
 export default function ClubDashboard() {
   // Example proposals array (you can map over this for multiple proposals)
@@ -45,7 +46,7 @@ export default function ClubDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#faf8ff] flex p-10">
+    <div className="min-h-screen bg-[#faf8ff] flex p-10 max-sm:p-5">
       <div className="w-full">
         {/* Top Bar */}
         <PageHeader user={"Username"}/>
@@ -74,7 +75,7 @@ export default function ClubDashboard() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 max-sm:grid-cols-2 gap-4 mb-8">
           <SummaryCard
             label="Active Bookings"
             value={0}

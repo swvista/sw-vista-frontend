@@ -54,7 +54,7 @@ export default function ClubDetails() {
   ];
 
   return (
-    <div className="bg-[#faf8ff] min-h-screen p-10">
+    <div className="bg-[#faf8ff] min-h-screen p-10 max-sm:p-5">
       {/* Header */}
       <PageHeader user={"Username"}/>
 

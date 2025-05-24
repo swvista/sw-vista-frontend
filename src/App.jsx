@@ -1,5 +1,5 @@
 import "./App.css";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import ClubDasboard from "./pages/dashboard/ClubDasboard";
 import { Theme } from "@radix-ui/themes";
 import VenuePage from "./pages/venues/VenuePage";
@@ -19,11 +19,16 @@ import WelfareDashboard from "./pages/dashboard/WelfareDashboard";
 import UserManagement from "./pages/UserManagement";
 
 function App() {
+  const location = useLocation();
+
+  // Check if the current path is /login
+  const isLoginPage = location.pathname === "/login";
+
   return (
     <div>
       <Theme>
-        <Sidebar />
-        <div className="w-[85vw] ml-[15vw]">
+        {!isLoginPage && <Sidebar />}
+        <div className={isLoginPage ? "w-full ml-0" : "w-[85vw] ml-[15vw] max-sm:ml-0 max-sm:w-full max-lg:ml-0 max-lg:w-full"}>
           <Routes>
             <Route path="/login" element={<Login />} />
 
@@ -35,8 +40,6 @@ function App() {
             <Route path="/welfareDashboard" element={<WelfareDashboard />} />
 
             <Route path="/users" element={<UserManagement />} />
-
-
 
             <Route path="/venues" element={<VenuePage />} />
             <Route path="/venueBookingHistory" element={<VenueBookingHistory />} />

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,21 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import PageHeader from "../Components/PageHeader";
+
+// Custom hook for responsive Sheet side
+function useMobileSheetSide() {
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 768 : false
+  );
+  useEffect(() => {
+    function handleResize() {
+      setIsMobile(window.innerWidth < 768);
+    }
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  return isMobile ? "bottom" : "right";
+}
 
 const userCategories = [
   { key: "clubMember", label: "Club Member" },
@@ -70,6 +85,7 @@ export default function UserManagement() {
     facultyAdvisor: [],
     securityHead: [],
   });
+  const sheetSide = useMobileSheetSide();
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -137,164 +153,49 @@ export default function UserManagement() {
     if (formCategory === "clubMember") {
       return (
         <>
-          <Input
-            name="name"
-            value={formState.name}
-            onChange={handleInputChange}
-            placeholder="Name"
-            required
-          />
-          <Input
-            name="learnerId"
-            value={formState.learnerId}
-            onChange={handleInputChange}
-            placeholder="Learner ID"
-            required
-          />
-          <Input
-            name="regNumber"
-            value={formState.regNumber}
-            onChange={handleInputChange}
-            placeholder="Registration Number"
-            required
-          />
-          <Input
-            name="post"
-            value={formState.post}
-            onChange={handleInputChange}
-            placeholder="Post"
-            required
-          />
-          <Input
-            name="clubName"
-            value={formState.clubName}
-            onChange={handleInputChange}
-            placeholder="Club Name"
-            required
-          />
+          <Input name="name" value={formState.name} onChange={handleInputChange} placeholder="Name" required className="w-full" />
+          <Input name="learnerId" value={formState.learnerId} onChange={handleInputChange} placeholder="Learner ID" required className="w-full" />
+          <Input name="regNumber" value={formState.regNumber} onChange={handleInputChange} placeholder="Registration Number" required className="w-full" />
+          <Input name="post" value={formState.post} onChange={handleInputChange} placeholder="Post" required className="w-full" />
+          <Input name="clubName" value={formState.clubName} onChange={handleInputChange} placeholder="Club Name" required className="w-full" />
         </>
       );
     }
     if (formCategory === "studentCouncil") {
       return (
         <>
-          <Input
-            name="name"
-            value={formState.name}
-            onChange={handleInputChange}
-            placeholder="Name"
-            required
-          />
-          <Input
-            name="learnerId"
-            value={formState.learnerId}
-            onChange={handleInputChange}
-            placeholder="Learner ID"
-            required
-          />
-          <Input
-            name="regNumber"
-            value={formState.regNumber}
-            onChange={handleInputChange}
-            placeholder="Registration Number"
-            required
-          />
-          <Input
-            name="post"
-            value={formState.post}
-            onChange={handleInputChange}
-            placeholder="Post"
-            required
-          />
+          <Input name="name" value={formState.name} onChange={handleInputChange} placeholder="Name" required className="w-full" />
+          <Input name="learnerId" value={formState.learnerId} onChange={handleInputChange} placeholder="Learner ID" required className="w-full" />
+          <Input name="regNumber" value={formState.regNumber} onChange={handleInputChange} placeholder="Registration Number" required className="w-full" />
+          <Input name="post" value={formState.post} onChange={handleInputChange} placeholder="Post" required className="w-full" />
         </>
       );
     }
     if (formCategory === "facultyAdvisor") {
       return (
         <>
-          <Input
-            name="name"
-            value={formState.name}
-            onChange={handleInputChange}
-            placeholder="Name"
-            required
-          />
-          <Input
-            name="email"
-            value={formState.email}
-            onChange={handleInputChange}
-            placeholder="Email"
-            required
-          />
-          <Input
-            name="designation"
-            value={formState.designation}
-            onChange={handleInputChange}
-            placeholder="Designation"
-            required
-          />
-          <Input
-            name="department"
-            value={formState.department}
-            onChange={handleInputChange}
-            placeholder="Department"
-            required
-          />
-          <Input
-            name="empId"
-            value={formState.empId}
-            onChange={handleInputChange}
-            placeholder="Employee ID"
-            required
-          />
-          <Input
-            name="clubName"
-            value={formState.clubName}
-            onChange={handleInputChange}
-            placeholder="Club Name"
-            required
-          />
+          <Input name="name" value={formState.name} onChange={handleInputChange} placeholder="Name" required className="w-full" />
+          <Input name="email" value={formState.email} onChange={handleInputChange} placeholder="Email" required className="w-full" />
+          <Input name="designation" value={formState.designation} onChange={handleInputChange} placeholder="Designation" required className="w-full" />
+          <Input name="department" value={formState.department} onChange={handleInputChange} placeholder="Department" required className="w-full" />
+          <Input name="empId" value={formState.empId} onChange={handleInputChange} placeholder="Employee ID" required className="w-full" />
+          <Input name="clubName" value={formState.clubName} onChange={handleInputChange} placeholder="Club Name" required className="w-full" />
         </>
       );
     }
     if (formCategory === "studentWelfare" || formCategory === "securityHead") {
       return (
         <>
-          <Input
-            name="name"
-            value={formState.name}
-            onChange={handleInputChange}
-            placeholder="Name"
-            required
-          />
-          <Input
-            name="email"
-            value={formState.email}
-            onChange={handleInputChange}
-            placeholder="Email"
-            required
-          />
-          <Input
-            name="designation"
-            value={formState.designation}
-            onChange={handleInputChange}
-            placeholder="Designation"
-            required
-          />
-          <Input
-            name="empId"
-            value={formState.empId}
-            onChange={handleInputChange}
-            placeholder="Employee ID"
-            required
-          />
+          <Input name="name" value={formState.name} onChange={handleInputChange} placeholder="Name" required className="w-full" />
+          <Input name="email" value={formState.email} onChange={handleInputChange} placeholder="Email" required className="w-full" />
+          <Input name="designation" value={formState.designation} onChange={handleInputChange} placeholder="Designation" required className="w-full" />
+          <Input name="empId" value={formState.empId} onChange={handleInputChange} placeholder="Employee ID" required className="w-full" />
         </>
       );
     }
     return null;
   }
 
-  // Render table headers based on category
   function renderTableHeaders(category) {
     if (category === "clubMember") {
       return (
@@ -346,7 +247,6 @@ export default function UserManagement() {
     return null;
   }
 
-  // Render table rows for a category
   function renderTableRows(category) {
     return users[category].map((user) => (
       <TableRow key={user.id} className="border-none font-medium">
@@ -386,18 +286,10 @@ export default function UserManagement() {
           </>
         )}
         <TableCell>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => openSheet(user, category)}
-          >
+          <Button variant="ghost" size="icon" onClick={() => openSheet(user, category)}>
             <FiEdit2 size={18} />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => deleteUser(user.id, category)}
-          >
+          <Button variant="ghost" size="icon" onClick={() => deleteUser(user.id, category)}>
             <FiTrash2 size={18} />
           </Button>
         </TableCell>
@@ -405,36 +297,24 @@ export default function UserManagement() {
     ));
   }
 
-  // When tab changes, update activeTab
   const handleTabChange = (type) => {
     setActiveTab(type);
   };
 
   return (
-    <div className="p-10 bg-[#faf8ff] min-h-screen">
+    <div className="p-4 sm:p-6 md:p-10 bg-[#faf8ff] min-h-screen">
       <PageHeader user="Username" />
-      <div className="flex justify-between mb-6">
-        <Tabs
-          value={activeTab}
-          onValueChange={handleTabChange}
-          className="w-full"
-        >
-          <TabsList className="py-5 px-1 bg-slate-100">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <TabsList className="py-3 bg-slate-100 shadow-md max-sm:rounded-full flex max-sm:justify-start overflow-auto w-full gap-2">
             {userCategories.map((type) => (
-              <TabsTrigger
-                key={type.key}
-                value={type.key}
-                className="rounded-sm p-4"
-              >
+              <TabsTrigger key={type.key} value={type.key} className="rounded-sm p-2 sm:p-4 text-xs sm:text-base max-sm:p-4 max-sm:rounded-full">
                 {type.label}
               </TabsTrigger>
             ))}
           </TabsList>
         </Tabs>
-        <Button
-          onClick={() => openSheet(null, activeTab)}
-          className="ml-4 flex items-center gap-2"
-        >
+        <Button onClick={() => openSheet(null, activeTab)} className="mt-3 sm:mt-0 sm:ml-4 flex items-center gap-2 w-full sm:w-auto bg-purple-700 hover:bg-purple-600">
           <FiPlus size={18} /> Add User
         </Button>
       </div>
@@ -442,20 +322,22 @@ export default function UserManagement() {
       <Tabs value={activeTab}>
         {userCategories.map((type) => (
           <TabsContent key={type.key} value={type.key}>
-            <Table className="bg-white p-2 rounded-md">
-              <TableHeader>
-                <TableRow className="border-gray-200">
-                  {renderTableHeaders(type.key)}
-                </TableRow>
-              </TableHeader>
-              <TableBody>{renderTableRows(type.key)}</TableBody>
-            </Table>
+            <div className="overflow-x-auto rounded-md">
+              <Table className="bg-white p-2 rounded-md min-w-[600px]">
+                <TableHeader>
+                  <TableRow className="border-gray-200">
+                    {renderTableHeaders(type.key)}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>{renderTableRows(type.key)}</TableBody>
+              </Table>
+            </div>
           </TabsContent>
         ))}
       </Tabs>
 
       <Sheet open={isSheetOpen} onOpenChange={closeSheet}>
-        <SheetContent side="right" className="max-w-md w-full px-5">
+        <SheetContent side={sheetSide} className="max-w-md w-full px-5">
           <SheetHeader>
             <SheetTitle>
               {editUser ? "Edit User" : "Create New User"}
@@ -464,11 +346,7 @@ export default function UserManagement() {
           <form onSubmit={handleFormSubmit} className="space-y-4 mt-4">
             <div>
               <label className="block mb-1 font-medium">User Category</label>
-              <Select
-                value={formCategory}
-                onValueChange={handleCategoryChange}
-                disabled={!!editUser}
-              >
+              <Select value={formCategory} onValueChange={handleCategoryChange} disabled={!!editUser}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>

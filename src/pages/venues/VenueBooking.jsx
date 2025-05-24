@@ -37,7 +37,7 @@ export default function VenueBooking() {
   }, [eventType]);
 
   return (
-    <div className="min-h-screen bg-[#fcfbff] p-10">
+    <div className="min-h-screen bg-[#fcfbff] p-10 max-sm:p-5">
       <PageHeader user={"Username"}/>
 
       <div className="mx-auto bg-white rounded-xl border border-gray-100 p-8">

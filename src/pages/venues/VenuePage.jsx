@@ -136,7 +136,7 @@ export default function VenuePage() {
       {/* Sidebar (if you want to include it) */}
       {/* <Sidebar /> */}
 
-      <div className="min-h-screen bg-gray-50 p-10 w-full">
+      <div className="min-h-screen bg-gray-50 p-10 w-full max-sm:p-5">
         {/* Header */}
         <PageHeader user="Username" />
 

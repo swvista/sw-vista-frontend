@@ -21,7 +21,7 @@ export default function CreateProposal() {
   const [specialReq, setSpecialReq] = useState("");
 
   return (
-    <div className="min-h-screen bg-[#fcfbff] p-10">
+    <div className="min-h-screen bg-[#fcfbff] p-10 max-sm:p-5">
       {/* Header */}
       <PageHeader user="Username"/>
 

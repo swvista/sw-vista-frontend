@@ -69,7 +69,7 @@ export default function ClubList() {
   });
 
   return (
-    <div className="space-y-4 p-10 bg-[#faf8ff] min-h-screen rounded">
+    <div className="space-y-4 p-10 max-sm:p-5 bg-[#faf8ff] min-h-screen rounded">
       {/* Header */}
       <PageHeader user="Username" />
       {/* Venues Title and Filters */}
@@ -89,7 +89,7 @@ export default function ClubList() {
             />
           </div>
           <div className="flex gap-2">
-            <Select>
+            <Select className="">
               <SelectTrigger className="w-[140px] border-gray-300 bg-white">
                 <SelectValue placeholder="All" />
               </SelectTrigger>

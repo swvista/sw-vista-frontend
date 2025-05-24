@@ -163,7 +163,7 @@ export default function EditPage() {
 
   return (
     <div className="bg-[#fcfbff] min-h-screen md:px-0">
-      <div className="p-10 mx-auto space-y-8">
+      <div className="p-10 max-sm:p-5 mx-auto space-y-8">
         <PageHeader user={"Username"}/>
 
         {/* Page Header */}

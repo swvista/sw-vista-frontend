@@ -48,7 +48,7 @@ export default function SecurityDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#faf8ff] flex p-10">
+    <div className="min-h-screen bg-[#faf8ff] flex p-10 max-sm:p-5">
       <EventDetails
         request={{
           eventName: "Annual Tech Fest",
@@ -78,7 +78,7 @@ export default function SecurityDashboard() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 max-sm: grid-cols-2 gap-4 mb-8">
           <SummaryCard
             label="Active Bookings"
             value={0}
