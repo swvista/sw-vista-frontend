@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Constants from "../../utils/constants";
+import { getCSRFToken, login } from "../../utils/authService";
 
 export function LoginForm({ className, ...props }) {
   const [username, setUsername] = useState("ssp");
@@ -17,26 +19,23 @@ export function LoginForm({ className, ...props }) {
     e.preventDefault();
     setError("");
     setLoading(true);
+    console.log(Constants.API_BASE_URL)
     try {
-      const response = await fetch("https://44e4-65-1-123-78.ngrok-free.app/api/v1/auth/login/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          username,
-          password
-        })
-      });
-      const data = await response.json();
+      await getCSRFToken()
+      
+      const response = await login(JSON.stringify({username,password}));
+      const data = response.data
+      console.log(response)
       console.log(data)
-      if (!response.ok) {
+      if (response.status!=200) {
         throw new Error(data.message || "Login failed");
       }
       // Handle successful login (e.g., save token, redirect)
       alert("Login successful!");
       if (data.username == "security")
-      navigate("/securityDashboard")
+        navigate("/securityDashboard")
+      if(data.username == "ssp")
+        navigate("/users")
       // Example: localStorage.setItem("token", data.token);
     } catch (err) {
       setError(err.message);

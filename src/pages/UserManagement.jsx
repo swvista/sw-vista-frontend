@@ -3,6 +3,7 @@ import { FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { createUser,getAllUsers } from "../utils/authService";
 import {
   Sheet,
   SheetContent,
@@ -52,21 +53,28 @@ const userCategories = [
 const getInitialFormState = (category) => {
   switch (category) {
     case "clubMember":
-      return { name: "", learnerId: "", regNumber: "", post: "", clubName: "" };
+      return {
+        name: "",
+        learner_id: "",
+        reg_number: "",
+        post: "",
+        club_name: ""
+      };
+
     case "studentCouncil":
-      return { name: "", learnerId: "", regNumber: "", post: "" };
+      return { name: "", learner_id: "", reg_number: "", post: "" };
     case "facultyAdvisor":
       return {
         name: "",
         email: "",
         designation: "",
         department: "",
-        empId: "",
-        clubName: "",
+        emp_id: "",
+        club_name: "",
       };
     case "studentWelfare":
     case "securityHead":
-      return { name: "", email: "", designation: "", empId: "" };
+      return { name: "", email: "", designation: "", emp_id: "" };
     default:
       return {};
   }
@@ -86,6 +94,36 @@ export default function UserManagement() {
     securityHead: [],
   });
   const sheetSide = useMobileSheetSide();
+
+  useEffect(() => {
+    
+  
+    // Call and catch any unhandled errors just in case
+    fetchUsers().catch((error) => {
+      console.error("Async error in fetchUsers:", error);
+    });
+  }, []);
+  
+
+  const fetchUsers = async () => {
+    try {
+      const data = await getAllUsers();
+
+      // Categorize and map users to UI fields
+      const categorized = {
+        clubMember: data.filter(clubsMem =>clubsMem.role.name=="clubMember"),
+        studentCouncil: data.filter(clubsMem =>clubsMem.role.name=="studentCouncil"),
+        studentWelfare: data.filter(clubsMem =>clubsMem.role.name=="studentWelfare"),
+        facultyAdvisor: data.filter(clubsMem =>clubsMem.role.name=="facultyAdvisor"),
+        securityHead: data.filter(clubsMem =>clubsMem.role.name=="securityHead"),
+      };
+
+      setUsers(categorized);
+    } catch (error) {
+      // Log error details to console
+      console.error("Failed to fetch users:", error?.response?.data || error?.message || error);
+    }
+  };
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -117,28 +155,74 @@ export default function UserManagement() {
   };
 
   // Handle Add/Edit form submission
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (editUser) {
-      setUsers((prev) => ({
-        ...prev,
-        [formCategory]: prev[formCategory].map((u) =>
-          u.id === editUser.id
-            ? { ...formState, id: editUser.id, category: formCategory }
-            : u
-        ),
-      }));
-    } else {
-      setUsers((prev) => ({
-        ...prev,
-        [formCategory]: [
-          ...prev[formCategory],
-          { ...formState, id: Date.now().toString(), category: formCategory },
-        ],
-      }));
+
+    // 1. Define required fields by user type
+    const requiredFieldsByType = {
+      clubMember: ["name", "learner_id", "reg_number", "post", "club_name"],
+      studentCouncil: ["name", "learner_id", "reg_number", "post"],
+      facultyAdvisor: ["name", "email", "designation", "department", "emp_id", "club_name"],
+      studentWelfare: ["name", "email", "designation", "emp_id"],
+      securityHead: ["name", "email", "designation", "emp_id"],
+    };
+
+    const requiredFields = requiredFieldsByType[formCategory] || [];
+    const missingFields = requiredFields.filter((field) => !formState[field]?.trim());
+
+    // 2. Show validation error
+    if (missingFields.length > 0) {
+      alert(`Please fill in the following fields: ${missingFields.join(", ")}`);
+      return;
     }
-    closeSheet();
+
+    try {
+      if (editUser) {
+        // TODO: Hook up edit user API if needed
+        setUsers((prev) => ({
+          ...prev,
+          [formCategory]: prev[formCategory].map((u) =>
+            u.id === editUser.id
+              ? { ...formState, id: editUser.id, category: formCategory }
+              : u
+          ),
+        }));
+      } else {
+        // Construct payload
+        const coreFields = {
+          username: formState.name.toLowerCase().replace(/\s/g, ''),
+          name: formState.name,
+          email: formState.email || `${Date.now()}@example.com`,
+          password: 'test1234',
+          role: 4,
+        };
+
+        const profile = { ...formState };
+        delete profile.name;
+        delete profile.email;
+        console.log("Creating User...")
+        const response = await createUser({ ...coreFields, profile }, formCategory);
+        console.log("Response : ", response)
+        setUsers((prev) => ({
+          ...prev,
+          [formCategory]: [
+            ...prev[formCategory],
+            { ...formState, id: response.id || Date.now().toString(), category: formCategory },
+          ],
+        }));
+      }
+
+      fetchUsers().catch((error) => {
+        console.error("Async error in fetchUsers:", error);
+      });
+      closeSheet();
+    } catch (error) {
+      console.error("Error creating user:", error.response?.data || error.message);
+      alert("Failed to create user. Check console for details.");
+    }
   };
+
+
 
   // Handle Delete
   const deleteUser = (id, category) => {
@@ -154,10 +238,10 @@ export default function UserManagement() {
       return (
         <>
           <Input name="name" value={formState.name} onChange={handleInputChange} placeholder="Name" required className="w-full" />
-          <Input name="learnerId" value={formState.learnerId} onChange={handleInputChange} placeholder="Learner ID" required className="w-full" />
-          <Input name="regNumber" value={formState.regNumber} onChange={handleInputChange} placeholder="Registration Number" required className="w-full" />
-          <Input name="post" value={formState.post} onChange={handleInputChange} placeholder="Post" required className="w-full" />
-          <Input name="clubName" value={formState.clubName} onChange={handleInputChange} placeholder="Club Name" required className="w-full" />
+          <Input name="learner_id" value={formState.learner_id} onChange={handleInputChange} placeholder="Learner ID" />
+          <Input name="reg_number" value={formState.reg_number} onChange={handleInputChange} placeholder="Registration Number" />
+          <Input name="club_name" value={formState.club_name} onChange={handleInputChange} placeholder="Club Name" />
+          <Input name="post" value={formState.post} onChange={handleInputChange} placeholder="post" required className="w-full" />
         </>
       );
     }
@@ -165,8 +249,8 @@ export default function UserManagement() {
       return (
         <>
           <Input name="name" value={formState.name} onChange={handleInputChange} placeholder="Name" required className="w-full" />
-          <Input name="learnerId" value={formState.learnerId} onChange={handleInputChange} placeholder="Learner ID" required className="w-full" />
-          <Input name="regNumber" value={formState.regNumber} onChange={handleInputChange} placeholder="Registration Number" required className="w-full" />
+          <Input name="learner_id" value={formState.learner_id} onChange={handleInputChange} placeholder="Learner ID" required className="w-full" />
+          <Input name="reg_number" value={formState.reg_number} onChange={handleInputChange} placeholder="Registration Number" required className="w-full" />
           <Input name="post" value={formState.post} onChange={handleInputChange} placeholder="Post" required className="w-full" />
         </>
       );
@@ -178,8 +262,8 @@ export default function UserManagement() {
           <Input name="email" value={formState.email} onChange={handleInputChange} placeholder="Email" required className="w-full" />
           <Input name="designation" value={formState.designation} onChange={handleInputChange} placeholder="Designation" required className="w-full" />
           <Input name="department" value={formState.department} onChange={handleInputChange} placeholder="Department" required className="w-full" />
-          <Input name="empId" value={formState.empId} onChange={handleInputChange} placeholder="Employee ID" required className="w-full" />
-          <Input name="clubName" value={formState.clubName} onChange={handleInputChange} placeholder="Club Name" required className="w-full" />
+          <Input name="emp_id" value={formState.emp_id} onChange={handleInputChange} placeholder="Employee ID" required className="w-full" />
+          <Input name="club_name" value={formState.club_name} onChange={handleInputChange} placeholder="Club Name" required className="w-full" />
         </>
       );
     }
@@ -189,7 +273,7 @@ export default function UserManagement() {
           <Input name="name" value={formState.name} onChange={handleInputChange} placeholder="Name" required className="w-full" />
           <Input name="email" value={formState.email} onChange={handleInputChange} placeholder="Email" required className="w-full" />
           <Input name="designation" value={formState.designation} onChange={handleInputChange} placeholder="Designation" required className="w-full" />
-          <Input name="empId" value={formState.empId} onChange={handleInputChange} placeholder="Employee ID" required className="w-full" />
+          <Input name="emp_id" value={formState.emp_id} onChange={handleInputChange} placeholder="Employee ID" required className="w-full" />
         </>
       );
     }
@@ -253,17 +337,17 @@ export default function UserManagement() {
         {category === "clubMember" && (
           <>
             <TableCell>{user.name}</TableCell>
-            <TableCell>{user.learnerId}</TableCell>
-            <TableCell>{user.regNumber}</TableCell>
+            <TableCell>{user.learner_id}</TableCell>
+            <TableCell>{user.reg_number}</TableCell>
             <TableCell>{user.post}</TableCell>
-            <TableCell>{user.clubName}</TableCell>
+            <TableCell>{user.club_name}</TableCell>
           </>
         )}
         {category === "studentCouncil" && (
           <>
             <TableCell>{user.name}</TableCell>
-            <TableCell>{user.learnerId}</TableCell>
-            <TableCell>{user.regNumber}</TableCell>
+            <TableCell>{user.learner_id}</TableCell>
+            <TableCell>{user.reg_number}</TableCell>
             <TableCell>{user.post}</TableCell>
           </>
         )}
@@ -273,8 +357,8 @@ export default function UserManagement() {
             <TableCell>{user.email}</TableCell>
             <TableCell>{user.designation}</TableCell>
             <TableCell>{user.department}</TableCell>
-            <TableCell>{user.empId}</TableCell>
-            <TableCell>{user.clubName}</TableCell>
+            <TableCell>{user.emp_id}</TableCell>
+            <TableCell>{user.club_name}</TableCell>
           </>
         )}
         {(category === "studentWelfare" || category === "securityHead") && (
@@ -282,7 +366,7 @@ export default function UserManagement() {
             <TableCell>{user.name}</TableCell>
             <TableCell>{user.email}</TableCell>
             <TableCell>{user.designation}</TableCell>
-            <TableCell>{user.empId}</TableCell>
+            <TableCell>{user.emp_id}</TableCell>
           </>
         )}
         <TableCell>
