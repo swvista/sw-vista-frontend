@@ -3,7 +3,7 @@ import axiosClient from './AxiosClient';
 import Cookies from 'js-cookie';
 
 export const getCSRFToken = async () => {
-    await axiosClient.get('api/v1/auth/csrf/'); // should trigger CSRF cookie
+    await axiosClient.get('api/v1/auth/csrf/'); 
 };
 
 export const login = async (credentials) => {
@@ -14,7 +14,8 @@ export const login = async (credentials) => {
 
     const response = await axiosClient.post('api/v1/auth/login/', credentials, {
         headers: {
-            "X-CSRFToken": csrfToken, // ✅ CORRECTED header
+            "X-CSRFToken": csrfToken, 
+            
         },
     });
     return response;
@@ -23,6 +24,17 @@ export const login = async (credentials) => {
 export const logout = async () => {
     return axiosClient.post('api/v1/auth/logout/');
 };
+
+
+export const getME=async()=>{
+    const csrfToken = Cookies.get('csrftoken');
+    const response = await axiosClient.get('api/v1/auth/me/',{
+        headers:{
+            'X-CSRFToken':csrfToken,
+        }
+    })
+    return response;
+}
 
 
 export const createUser = async (userData, userType) => {
@@ -34,21 +46,19 @@ export const createUser = async (userData, userType) => {
         userData,
         {
             headers: {
-                "X-CSRFToken": csrfToken, // ✅ CORRECTED header
+                "X-CSRFToken": csrfToken, 
             },
         }
     );
     return response.data;
 };
 
-// ✅ NEW: Get all users with profile & permission data
 export const getAllUsers = async () => {
     const csrfToken = Cookies.get('csrftoken');
     const response = await axiosClient.get('api/v1/auth/user/', {
         headers: {
             "X-CSRFToken": csrfToken,
         },
-        withCredentials: true,
     });
     return response.data;
 };
