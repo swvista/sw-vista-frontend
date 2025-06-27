@@ -3,7 +3,7 @@ import { FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createUser,getAllUsers } from "../utils/authService";
+import { createUser, getAllUsers, getME } from "../utils/authService";
 import {
   Sheet,
   SheetContent,
@@ -55,14 +55,14 @@ const getInitialFormState = (category) => {
     case "clubMember":
       return {
         name: "",
-        learner_id: "",
+        email: "",
         reg_number: "",
-        post: "",
+        post: 4,
         club_name: ""
       };
 
     case "studentCouncil":
-      return { name: "", learner_id: "", reg_number: "", post: "" };
+      return { name: "", email: "", reg_number: "", post: 4 };
     case "facultyAdvisor":
       return {
         name: "",
@@ -94,31 +94,41 @@ export default function UserManagement() {
     securityHead: [],
   });
   const sheetSide = useMobileSheetSide();
+  const [loggedInUser, setLoggedInUser] = useState({})
 
   useEffect(() => {
-    
-  
+
+
     // Call and catch any unhandled errors just in case
     fetchUsers().catch((error) => {
       console.error("Async error in fetchUsers:", error);
     });
   }, []);
-  
+
 
   const fetchUsers = async () => {
     try {
+
+      const loggedInUserData = await getME();
+
+      setLoggedInUser(loggedInUserData.data)
       const data = await getAllUsers();
 
-      // Categorize and map users to UI fields
       const categorized = {
-        clubMember: data.filter(clubsMem =>clubsMem.role.name=="clubMember"),
-        studentCouncil: data.filter(clubsMem =>clubsMem.role.name=="studentCouncil"),
-        studentWelfare: data.filter(clubsMem =>clubsMem.role.name=="studentWelfare"),
-        facultyAdvisor: data.filter(clubsMem =>clubsMem.role.name=="facultyAdvisor"),
-        securityHead: data.filter(clubsMem =>clubsMem.role.name=="securityHead"),
+        clubMember: data.filter(u => u.role.name === "clubMember")
+          .map(u => ({ ...u, profile: u.profile || {} })),
+        studentCouncil: data.filter(u => u.role.name === "studentCouncil")
+          .map(u => ({ ...u, profile: u.profile || {} })),
+        studentWelfare: data.filter(u => u.role.name === "studentWelfare")
+          .map(u => ({ ...u, profile: u.profile || {} })),
+        facultyAdvisor: data.filter(u => u.role.name === "facultyAdvisor")
+          .map(u => ({ ...u, profile: u.profile || {} })),
+        securityHead: data.filter(u => u.role.name === "securityHead")
+          .map(u => ({ ...u, profile: u.profile || {} })),
       };
 
       setUsers(categorized);
+
     } catch (error) {
       // Log error details to console
       console.error("Failed to fetch users:", error?.response?.data || error?.message || error);
@@ -143,8 +153,18 @@ export default function UserManagement() {
     setEditUser(user);
     setIsSheetOpen(true);
     setFormCategory(user ? user.category : category);
-    setFormState(user ? { ...user } : getInitialFormState(category));
+  
+    if (user) {
+      setFormState({
+        ...user.profile,
+        name: user.name,
+        email: user.email,
+      });
+    } else {
+      setFormState(getInitialFormState(category));
+    }
   };
+  
 
   // Close sheet and reset
   const closeSheet = () => {
@@ -155,74 +175,72 @@ export default function UserManagement() {
   };
 
   // Handle Add/Edit form submission
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
+ // Handle Add/Edit form submission
+const handleFormSubmit = async (e) => {
+  e.preventDefault();
 
-    // 1. Define required fields by user type
-    const requiredFieldsByType = {
-      clubMember: ["name", "learner_id", "reg_number", "post", "club_name"],
-      studentCouncil: ["name", "learner_id", "reg_number", "post"],
-      facultyAdvisor: ["name", "email", "designation", "department", "emp_id", "club_name"],
-      studentWelfare: ["name", "email", "designation", "emp_id"],
-      securityHead: ["name", "email", "designation", "emp_id"],
-    };
-
-    const requiredFields = requiredFieldsByType[formCategory] || [];
-    const missingFields = requiredFields.filter((field) => !formState[field]?.trim());
-
-    // 2. Show validation error
-    if (missingFields.length > 0) {
-      alert(`Please fill in the following fields: ${missingFields.join(", ")}`);
-      return;
-    }
-
-    try {
-      if (editUser) {
-        // TODO: Hook up edit user API if needed
-        setUsers((prev) => ({
-          ...prev,
-          [formCategory]: prev[formCategory].map((u) =>
-            u.id === editUser.id
-              ? { ...formState, id: editUser.id, category: formCategory }
-              : u
-          ),
-        }));
-      } else {
-        // Construct payload
-        const coreFields = {
-          username: formState.name.toLowerCase().replace(/\s/g, ''),
-          name: formState.name,
-          email: formState.email || `${Date.now()}@example.com`,
-          password: 'test1234',
-          role: 4,
-        };
-
-        const profile = { ...formState };
-        delete profile.name;
-        delete profile.email;
-        console.log("Creating User...")
-        const response = await createUser({ ...coreFields, profile }, formCategory);
-        console.log("Response : ", response)
-        setUsers((prev) => ({
-          ...prev,
-          [formCategory]: [
-            ...prev[formCategory],
-            { ...formState, id: response.id || Date.now().toString(), category: formCategory },
-          ],
-        }));
-      }
-
-      fetchUsers().catch((error) => {
-        console.error("Async error in fetchUsers:", error);
-      });
-      closeSheet();
-    } catch (error) {
-      console.error("Error creating user:", error.response?.data || error.message);
-      alert("Failed to create user. Check console for details.");
-    }
+  // Define required fields per user type
+  const requiredByType = {
+    clubMember: ["name", "email", "reg_number", "post", "club_name"],
+    studentCouncil: ["name", "email", "reg_number", "post"],
+    facultyAdvisor: ["name", "email", "designation", "department", "emp_id", "club_name"],
+    studentWelfare: ["name", "email", "designation", "emp_id"],
+    securityHead: ["name", "email", "designation", "emp_id"],
   };
+  const requiredFields = requiredByType[formCategory] || [];
+  const missing = requiredFields.filter(f => !formState[f]?.trim());
+  if (missing.length > 0) {
+    return alert(`Please fill in: ${missing.join(", ")}`);
+  }
 
+  try {
+    if (editUser) {
+      // TODO: Add update API call here if implemented
+      setUsers(prev => ({
+        ...prev,
+        [formCategory]: prev[formCategory].map(u =>
+          u.id === editUser.id
+            ? { ...u, profile: extractProfile(formState), name: formState.name, email: formState.email }
+            : u
+        ),
+      }));
+    } else {
+      const core = {
+        username: formState.name.toLowerCase().replace(/\s/g, ""),
+        name: formState.name,
+        email: formState.email,
+        password: "test1234",
+        role: 4,
+      };
+      const payload = {
+        ...core,
+        profile: extractProfile(formState),
+      };
 
+      const response = await createUser(payload, formCategory);
+      setUsers(prev => ({
+        ...prev,
+        [formCategory]: [
+          ...prev[formCategory],
+          { id: response.id || Date.now().toString(), ...payload },
+        ],
+      }));
+    }
+
+    await fetchUsers();
+    closeSheet();
+
+  } catch (err) {
+    console.error("Error submitting form:", err.response?.data || err.message);
+    alert("Failed to submit. Check console for details.");
+  }
+};
+
+// Helper to extract only profile fields (excluding name/email)
+function extractProfile(state) {
+  const { name, email, ...rest } = state;
+  return rest;
+}
 
   // Handle Delete
   const deleteUser = (id, category) => {
@@ -238,8 +256,8 @@ export default function UserManagement() {
       return (
         <>
           <Input name="name" value={formState.name} onChange={handleInputChange} placeholder="Name" required className="w-full" />
-          <Input name="learner_id" value={formState.learner_id} onChange={handleInputChange} placeholder="Learner ID" />
-          <Input name="reg_number" value={formState.reg_number} onChange={handleInputChange} placeholder="Registration Number" />
+          <Input name="email" value={formState.email} onChange={handleInputChange} placeholder="Learner ID" />
+          <Input name="reg_number" value={formState?.profile?.reg_number} onChange={handleInputChange} placeholder="Registration Number" />
           <Input name="club_name" value={formState.club_name} onChange={handleInputChange} placeholder="Club Name" />
           <Input name="post" value={formState.post} onChange={handleInputChange} placeholder="post" required className="w-full" />
         </>
@@ -249,8 +267,8 @@ export default function UserManagement() {
       return (
         <>
           <Input name="name" value={formState.name} onChange={handleInputChange} placeholder="Name" required className="w-full" />
-          <Input name="learner_id" value={formState.learner_id} onChange={handleInputChange} placeholder="Learner ID" required className="w-full" />
-          <Input name="reg_number" value={formState.reg_number} onChange={handleInputChange} placeholder="Registration Number" required className="w-full" />
+          <Input name="email" value={formState.email} onChange={handleInputChange} placeholder="Learner ID" required className="w-full" />
+          <Input name="reg_number" value={formState?.profile?.reg_number} onChange={handleInputChange} placeholder="Registration Number" required className="w-full" />
           <Input name="post" value={formState.post} onChange={handleInputChange} placeholder="Post" required className="w-full" />
         </>
       );
@@ -337,16 +355,17 @@ export default function UserManagement() {
         {category === "clubMember" && (
           <>
             <TableCell>{user.name}</TableCell>
-            <TableCell>{user.learner_id}</TableCell>
-            <TableCell>{user.reg_number}</TableCell>
-            <TableCell>{user.post}</TableCell>
-            <TableCell>{user.club_name}</TableCell>
+            <TableCell>{user.profile.learner_id}</TableCell>
+            <TableCell>{user.profile.reg_number}</TableCell>
+            <TableCell>{user.profile.post}</TableCell>
+            <TableCell>{user.profile.club_name}</TableCell>
           </>
         )}
+
         {category === "studentCouncil" && (
           <>
             <TableCell>{user.name}</TableCell>
-            <TableCell>{user.learner_id}</TableCell>
+            <TableCell>{user.email}</TableCell>
             <TableCell>{user.reg_number}</TableCell>
             <TableCell>{user.post}</TableCell>
           </>
@@ -387,7 +406,7 @@ export default function UserManagement() {
 
   return (
     <div className="p-4 sm:p-6 md:p-10 bg-[#faf8ff] min-h-screen">
-      <PageHeader user="Username" />
+      <PageHeader user={loggedInUser?.username} />
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="py-3 bg-slate-100 shadow-md max-sm:rounded-full flex max-sm:justify-start overflow-auto w-full gap-2">
