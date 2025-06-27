@@ -17,6 +17,7 @@ const menu = [
   { name: "Venue Booking", icon: <FaCalendarAlt />, path: "/venueBooking" },
   { name: "Submit Report", icon: <FaRegFileAlt />, path: "/submitReport" },
   { name: "All Clubs", icon: <FaRegFileAlt />, path: "/clubs" },
+  { name: "User Management", icon: <FaRegFileAlt />, path: "/users" },
 ];
 
 export default function Sidebar() {

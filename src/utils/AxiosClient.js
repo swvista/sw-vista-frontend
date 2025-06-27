@@ -3,7 +3,10 @@ import axios from 'axios';
 import Constants from './constants';
 
 const axiosClient = axios.create({
-  baseURL: Constants.API_BASE_URL,
+  baseURL: Constants.API_BASE_URL_NGROK,
+  headers: {
+    'Content-Type': 'application/json',
+  },
   withCredentials: true,
 });
 
