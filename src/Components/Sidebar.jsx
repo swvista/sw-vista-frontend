@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaHome, FaBuilding, FaFileAlt, FaCalendarAlt, FaRegFileAlt, FaBars } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -6,29 +6,69 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetClose,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { getME } from "../utils/authService"; // Correct import path
 
 const menu = [
-  { name: "Dashboard", icon: <FaHome />, path: "/councilDashboard" },
-  { name: "Venues", icon: <FaBuilding />, path: "/venues" },
-  { name: "Create Proposal", icon: <FaFileAlt />, path: "/createProposal" },
-  { name: "Venue Booking", icon: <FaCalendarAlt />, path: "/venueBooking" },
-  { name: "Submit Report", icon: <FaRegFileAlt />, path: "/submitReport" },
-  { name: "All Clubs", icon: <FaRegFileAlt />, path: "/clubs" },
-  { name: "User Management", icon: <FaRegFileAlt />, path: "/users" },
+  { name: "Dashboard", icon: <FaHome />, path: "/councilDashboard", roles: ["facultyadvisor", "studentcouncil", "clubmember", "studentwelfare", "securityhead", "admin","ssp"] },
+  { name: "Venues", icon: <FaBuilding />, path: "/venues", roles: ["facultyadvisor", "studentaouncil", "clubmember", "studentwelfare", "securityhead", "admin","ssp"] },
+  { name: "Create Proposal", icon: <FaFileAlt />, path: "/createProposal", roles: ["clubmember", "facultyadvisor", "studentcouncil", "admin","ssp"] },
+  { name: "Venue Booking", icon: <FaCalendarAlt />, path: "/venueBooking", roles: ["clubmember", "facultyadvisor", "studentcouncil", "admin","ssp"] },
+  { name: "Submit Report", icon: <FaRegFileAlt />, path: "/submitReport", roles: ["clubmember", "facultyadvisor", "studentcouncil", "admin","ssp"] },
+  { name: "All Clubs", icon: <FaRegFileAlt />, path: "/clubs", roles: ["facultyadvisor", "studentcouncil", "admin","ssp"] },
+  { name: "User Management", icon: <FaRegFileAlt />, path: "/users", roles: ["admin","ssp"] },
 ];
 
 export default function Sidebar() {
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Shared navigation content
+  // Fetch user on mount
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const response = await getME();
+        setUser(response.data);
+      } catch (err) {
+        console.error("Failed to fetch user:", err);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchUser();
+  }, []);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="hidden lg:flex fixed flex-col h-screen w-[15vw] bg-[#2d1948] text-white justify-between z-40">
+        <div className="p-4 text-center">Loading...</div>
+      </div>
+    );
+  }
+
+  // If user fetch failed
+  if (!user) {
+    return (
+      <div className="hidden lg:flex fixed flex-col h-screen w-[15vw] bg-[#2d1948] text-white justify-between z-40">
+        <div className="p-4 text-center text-red-300">Failed to load user</div>
+      </div>
+    );
+  }
+
+  // Filter menu items based on user role
+  const filteredMenu = menu.filter(item =>
+    item.roles.includes(user.username)
+  );
+
   const navContent = (
     <nav className="mt-2">
       <ul className="flex flex-col gap-1">
-        {menu.map((item) => (
+        {filteredMenu.map((item) => (
           <li key={item.name}>
             <Link
               to={item.path}
@@ -53,9 +93,7 @@ export default function Sidebar() {
     <>
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex fixed flex-col h-screen w-[15vw] bg-[#2d1948] text-white justify-between z-40">
-        {/* Top section */}
         <div>
-          {/* Logo and App Name */}
           <div className="flex items-center gap-3 px-6 py-5 my-5 border-b border-purple-900">
             <div className="bg-purple-500 rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg">
               E
@@ -65,7 +103,6 @@ export default function Sidebar() {
           </div>
           {navContent}
         </div>
-        {/* Bottom section */}
         <div className="px-6 py-4">
           <div className="flex items-center text-gray-400 text-xs gap-2">
             <span className="text-lg">@</span>
@@ -114,10 +151,8 @@ export default function Sidebar() {
               <span>v1.00</span>
             </div>
           </div>
-
         </SheetContent>
       </Sheet>
-      {/* Spacer for mobile topbar */}
       <div className="lg:hidden h-16" />
     </>
   );

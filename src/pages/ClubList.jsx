@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -28,13 +28,37 @@ import { MoreVertical } from "lucide-react";
 import { FaMapMarkerAlt, FaUsers } from "react-icons/fa";
 import PageHeader from "../Components/PageHeader";
 import { useNavigate } from "react-router-dom";
+import { getAllClubsDetails } from "../utils/authService";
 
 export default function ClubList() {
   const [viewMode, setViewMode] = useState("table");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("all");
+  const [allClubs, setAllClubs] = useState([]);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch clubs from API
+    const fetchClubs = async () => {
+      try {
+        const response = await getAllClubsDetails();
+        if (response.status === 200) {
+          setAllClubs(response.data);
+        } else {
+          console.error("Failed to fetch clubs:", response.statusText);
+          alert("Failed to load clubs. Please try again.");
+        }
+      }
+      catch (error) {
+        console.error("Failed to fetch clubs:", error);
+        alert("Failed to load clubs. Please try again.");
+      }
+    };
+
+    console.log("Fetching clubs...", allClubs);
+    fetchClubs();
+  }, []);
 
   // Mock data - replace with your actual data source
   const clubs = [

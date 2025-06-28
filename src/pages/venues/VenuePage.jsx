@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { FaMapMarkerAlt, FaUsers } from "react-icons/fa";
 import { MdAdd, MdHistory } from "react-icons/md";
 import Sidebar from "../../Components/Sidebar";
@@ -21,6 +21,7 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import PageHeader from "../../Components/PageHeader";
+import { getAllVenues } from "../../utils/authService";
 
 const venues = [
   {
@@ -80,6 +81,9 @@ export default function VenuePage() {
   const [openAdd, setOpenAdd] = useState(false);
   const [openDetails, setOpenDetails] = useState(false);
   const [selectedVenue, setSelectedVenue] = useState(null);
+  const [venues, setVenues] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Edit Sheet state
   const [openEdit, setOpenEdit] = useState(false);
@@ -92,6 +96,24 @@ export default function VenuePage() {
     status: "",
     features: [],
   });
+  useEffect(() => {
+    async function fetchVenues() {
+      try {
+        const res = await getAllVenues();
+        console.log(res,"res")
+        setVenues(res); 
+      } catch (err) {
+        console.error("Error loading venues", err);
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchVenues();
+  }, []);
+
+  if (loading) return <div>Loading venues...</div>;
+  if (error) return <div>Error fetching venues 😞</div>;
 
   // Open view details
   const handleViewDetails = (venue) => {
@@ -337,7 +359,7 @@ export default function VenuePage() {
                 </div>
                 {/* Features */}
                 <div className="flex flex-wrap gap-2 mt-3">
-                  {venue.features.map((feature, i) => (
+                  {venue?.features?.map((feature, i) => (
                     <span
                       key={i}
                       className="bg-gray-100 text-gray-700 font-medium text-xs px-2 py-1 rounded-full"
@@ -356,23 +378,18 @@ export default function VenuePage() {
                     View Details
                   </Button>
                   <Button
-                    className={`flex-1 rounded-sm ${
-                      venue.status === "Available"
-                        ? "bg-purple-600 hover:bg-purple-700 text-white"
-                        : "bg-gray-300 text-white cursor-not-allowed"
-                    }`}
-                    disabled={venue.status !== "Available"}
+                    className={`flex-1 rounded-sm`}
                   >
                     Book Now
                   </Button>
                   {/* Edit Button */}
-                  <Button
+                  {/* <Button
                     variant="outline"
                     className="flex-1 border-slate-200 rounded-sm"
                     onClick={() => handleEditVenue(venue)}
                   >
                     Edit
-                  </Button>
+                  </Button> */}
                 </div>
               </div>
             </div>

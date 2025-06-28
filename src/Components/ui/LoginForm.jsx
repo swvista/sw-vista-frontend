@@ -34,6 +34,18 @@ export function LoginForm({ className, ...props }) {
       alert("Login successful!");
       if (data.username == "security")
         navigate("/securityDashboard")
+      if(data.username == "facultyadvisor")
+        navigate("/facultyDashboard")
+      if(data.username == "studentwelfare")
+        navigate("/welfareDashboard")
+      if(data.username == "studentcouncil")
+        navigate("/councilDashboard")
+      if(data.username == "securityhead")
+        navigate("/securityDashboard")
+      if(data.username == "clubmember")
+        navigate("/clubDashboard")
+      if(data.username == "admin")
+        navigate("/users")
       if(data.username == "ssp")
         navigate("/users")
       // Example: localStorage.setItem("token", data.token);
