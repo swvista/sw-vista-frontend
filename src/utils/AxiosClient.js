@@ -1,4 +1,3 @@
-// src/services/axiosClient.js
 import axios from 'axios';
 import Constants from './constants';
 
@@ -27,3 +26,4 @@ axiosClient.interceptors.response.use(
 );
 
 export default axiosClient;
+

@@ -39,7 +39,7 @@ function App() {
             <Route path="/facultyDashboard" element={<FacultyDashboard />} />
             <Route path="/welfareDashboard" element={<WelfareDashboard />} />
 
-            <Route path="/users" element={<UserManagement />} />
+            <Route path="/rbac" element={<UserManagement />} />
 
             <Route path="/venues" element={<VenuePage />} />
             <Route path="/venueBookingHistory" element={<VenueBookingHistory />} />

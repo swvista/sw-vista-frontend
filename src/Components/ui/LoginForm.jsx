@@ -5,11 +5,11 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Constants from "../../utils/constants";
-import { getCSRFToken, login } from "../../utils/authService";
+import { login } from "../../utils/authService";
 
 export function LoginForm({ className, ...props }) {
-  const [username, setUsername] = useState("ssp");
-  const [password, setPass] = useState("password123");
+  const [username, setUsername] = useState("admin");
+  const [password, setPass] = useState("spiderman");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -19,14 +19,9 @@ export function LoginForm({ className, ...props }) {
     e.preventDefault();
     setError("");
     setLoading(true);
-    console.log(Constants.API_BASE_URL)
     try {
-      await getCSRFToken()
-      
       const response = await login(JSON.stringify({username,password}));
       const data = response.data
-      console.log(response)
-      console.log(data)
       if (response.status!=200) {
         throw new Error(data.message || "Login failed");
       }
@@ -45,9 +40,9 @@ export function LoginForm({ className, ...props }) {
       if(data.username == "clubmember")
         navigate("/clubDashboard")
       if(data.username == "admin")
-        navigate("/users")
+        navigate("/rbac")
       if(data.username == "ssp")
-        navigate("/users")
+        navigate("/rbac")
       // Example: localStorage.setItem("token", data.token);
     } catch (err) {
       setError(err.message);
@@ -106,3 +101,4 @@ export function LoginForm({ className, ...props }) {
     </form>
   );
 }
+

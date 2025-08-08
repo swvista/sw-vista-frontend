@@ -1,258 +1,59 @@
-// src/services/authService.js
 import axiosClient from './AxiosClient';
 import Cookies from 'js-cookie';
 
-export const getCSRFToken = async () => {
-    await axiosClient.get('api/v1/auth/csrf/'); 
-};
+const getHeaders = () => ({
+    headers: { 'X-CSRFToken': Cookies.get('csrftoken') }
+});
+
+export const getCSRFToken = () => axiosClient.get('api/v1/auth/csrf/');
 
 export const login = async (credentials) => {
-    await getCSRFToken()
-
-    const csrfToken = Cookies.get('csrftoken');
-    console.log("csrf : ", csrfToken);
-
-    const response = await axiosClient.post('api/v1/auth/login/', credentials, {
-        headers: {
-            "X-CSRFToken": csrfToken, 
-            
-        },
-    });
-    return response;
+    await getCSRFToken();
+    return axiosClient.post('api/v1/auth/login/', credentials, getHeaders());
 };
 
-export const logout = async () => {
-    return axiosClient.post('api/v1/auth/logout/');
-};
+export const logout = () => axiosClient.post('api/v1/auth/logout/', {}, getHeaders());
+
+export const getME = () => axiosClient.get('api/v1/auth/user/me/', getHeaders());
+
+export const createUser = (userData, userType) => axiosClient.post(`api/v1/auth/user/?type=${userType}`, userData, getHeaders());
+
+export const getAllUsers = () => axiosClient.get('api/v1/auth/user/', getHeaders());
+
+export const updateUser = (userId, updatedData) => axiosClient.put(`api/v1/auth/user/${userId}/`, updatedData, getHeaders());
+
+export const deleteUser = (userId) => axiosClient.delete(`api/v1/auth/user/${userId}/`, getHeaders());
+
+export const getAllGroups = () => axiosClient.get('api/v1/auth/group/', getHeaders());
+
+export const createGroup = (groupData) => axiosClient.post('api/v1/auth/group/', groupData, getHeaders());
+
+export const updateGroup = (groupId, groupData) => axiosClient.put(`api/v1/auth/group/${groupId}/`, groupData, getHeaders());
+
+export const deleteGroup = (groupId) => axiosClient.delete(`api/v1/auth/group/${groupId}/`, getHeaders());
+
+export const getAllPermissions = () => axiosClient.get('api/v1/auth/permission/', getHeaders());
+
+export const getAllVenues = () => axiosClient.get('api/v1/api/venue/', getHeaders());
+
+export const createProposal = (proposalData) => axiosClient.post('api/v1/api/proposal/', proposalData, getHeaders());
+
+export const getUserProposals = () => axiosClient.get('api/v1/api/proposal/get_all_proposals_by_user/', getHeaders());
+
+export const createVenueBooking = (bookingData) => axiosClient.post('api/v1/api/booking/', bookingData, getHeaders());
+
+export const getApprovedProposals = () => axiosClient.get('api/v1/api/proposal/', getHeaders()).then(res => res.data.filter(p => p.status === 1));
+
+export const getVenueBookings = () => axiosClient.get('api/v1/api/booking/', getHeaders());
+
+export const approveBooking = (bookingId) => axiosClient.post(`api/v1/api/booking-approval/${bookingId}/approve/`, {}, getHeaders());
+
+export const rejectBooking = (bookingId, comments) => axiosClient.post(`api/v1/api/booking-approval/${bookingId}/reject/`, { comments }, getHeaders());
+
+export const getAllClubsDetails = () => axiosClient.get(`api/v1/api/club/get_all_club_details/`, getHeaders());
+
+export const getAllClubs = () => axiosClient.get('api/v1/api/club/', getHeaders());
+
+export const submitReport = (formData) => axiosClient.post('api/v1/api/report/', formData, { headers: { ...getHeaders().headers, "Content-Type": "multipart/form-data" } });
 
 
-export const getME=async()=>{
-    const csrfToken = Cookies.get('csrftoken');
-    const response = await axiosClient.get('api/v1/auth/me/',{
-        headers:{
-            'X-CSRFToken':csrfToken,
-        }
-    })
-    return response;
-}
-
-
-export const createUser = async (userData, userType) => {
-    const csrfToken = Cookies.get('csrftoken');
-    console.log("csrf : ", csrfToken);
-
-    const response = await axiosClient.post(
-        `api/v1/auth/user/?type=${userType}`,
-        userData,
-        {
-            headers: {
-                "X-CSRFToken": csrfToken, 
-            },
-        }
-    );
-    return response.data;
-};
-
-export const getAllUsers = async () => {
-    const csrfToken = Cookies.get('csrftoken');
-    const response = await axiosClient.get('api/v1/auth/user/', {
-        headers: {
-            "X-CSRFToken": csrfToken,
-        },
-    });
-    return response.data;
-};
-
-
-/**
- * Updates a user and their associated profile.
- *
- * @param {Object} updatedData - The complete payload to update.
- * @param {string} userType - One of: 'clubMember', 'studentCouncil', 'facultyAdvisor', 'studentWelfare', 'securityHead'
- *
- * Example `updatedData` structure:
- * {
- *   id: 35,
- *   username: "samantha",
- *   email: "sam@college.edu",
- *   name: "Samantha",
- *   registration_id: "REG4567",
- *   role: 4,
- *   profile: {
- *     learner_id: "L12345",
- *     reg_number: "REG4567",
- *     post: "Vice President",
- *     club_name: "AI Club"
- *   }
- * }
- */
-export const updateUser = async (updatedData, userType) => {
-    console.log("Updating user with data:", updatedData);
-    console.log("User type:", userType);
-    const csrfToken = Cookies.get('csrftoken');
-    const response = await axiosClient.put(
-        `api/v1/auth/user/?type=${userType}`,
-        updatedData,
-        {
-            headers: {
-                "X-CSRFToken": csrfToken,
-            },
-        }
-    );
-    return response.data;
-};
-
-/**
- * Delete a user by ID
- *
- * @param {number} userId - The ID of the user to delete
- *
- * Example:
- * await deleteUser(23)
- */
-export const deleteUser = async (user) => {
-    const csrfToken = Cookies.get('csrftoken');
-    const response = await axiosClient.delete('api/v1/auth/user/', {
-      headers: {
-        "X-CSRFToken": csrfToken,
-      },
-      data: {
-        user, // Django expects this in request body
-      },
-    });
-    return response.data;
-  };
-  
-
-/**
- * Get all Venues
- *
- *
- * Example:
- * await getAllVenues()
- */
-export const getAllVenues = async () => {
-    const csrfToken = Cookies.get('csrftoken');
-    const response = await axiosClient.get('api/v1/api/venue/get-all/', {
-      headers: {
-        "X-CSRFToken": csrfToken,
-      }
-    });
-    return response.data;
-  };
-
-
-  export const createProposal = async (proposalData) => {
-  const csrfToken = Cookies.get('csrftoken');
-  try {
-    const response = await axiosClient.post('api/v1/api/proposal/create/', proposalData, {
-      headers: {
-        'X-CSRFToken': csrfToken,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error creating proposal:', error.response?.data || error.message);
-    throw error;
-  }
-};
-
-export const getUserProposals = async () => {
-  const csrfToken = Cookies.get('csrftoken');
-  try {
-    const response = await axiosClient.get('api/v1/api/proposal/get-all-by-user/', {
-      headers: {
-        "X-CSRFToken": csrfToken,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching proposals:', error.response?.data || error.message);
-    throw error;
-  }
-};
-
-export const createVenueBooking = async (bookingData) => {
-  const csrfToken = Cookies.get('csrftoken');
-  try {
-    const response = await axiosClient.post('api/v1/api/booking/create/', bookingData, {
-      headers: { "X-CSRFToken": csrfToken }
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Booking failed:', error.response?.data || error.message);
-    throw error;
-  }
-};
-
-export const getApprovedProposals = async () => {
-  const csrfToken = Cookies.get('csrftoken');
-  try {
-    const response = await axiosClient.get('api/v1/api/proposal/get-all-by-user/', {
-      headers: { "X-CSRFToken": csrfToken }
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching proposals:', error.response?.data || error.message);
-    throw error;
-  }
-};
-
-// Get venue bookings
-export const getVenueBookings = async () => {
-  const csrfToken = Cookies.get('csrftoken');
-  try {
-    const response = await axiosClient.get('api/v1/api/booking/get-all/', {
-      headers: { "X-CSRFToken": csrfToken }
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching venue bookings:', error.response?.data || error.message);
-    throw error;
-  }
-};
-
-
-export const approveBooking = async (bookingId) => {
-  const csrfToken = Cookies.get('csrftoken');
-  return axiosClient.post(`api/v1/api/approvals/approve/${bookingId}/`, {}, {
-    headers: { "X-CSRFToken": csrfToken }
-  });
-};
-
-export const rejectBooking = async (bookingId, comments) => {
-  const csrfToken = Cookies.get('csrftoken');
-  return axiosClient.post(`api/v1/api/approvals/reject/${bookingId}/`, { comments }, {
-    headers: { "X-CSRFToken": csrfToken }
-  });
-};
-
-export const getAllClubsDetails = async (bookingId, comments) => {
-  const csrfToken = Cookies.get('csrftoken');
-  return axiosClient.get(`api/v1/api/club/get-all-club-details/`, {
-    headers: { "X-CSRFToken": csrfToken }
-  });
-};
-
-export const getAllClubs = async () => {
-  const csrfToken = Cookies.get('csrftoken');
-  const response = await axiosClient.get('api/v1/api/club/get-all/', {
-    headers: { "X-CSRFToken": csrfToken }
-  });
-  return response.data;
-};
-
-export const submitReport = async (formData) => {
-  const csrfToken = Cookies.get('csrftoken');
-  try {
-    const response = await axiosClient.post('api/v1/api/reports/', formData, {
-      headers: { 
-        "X-CSRFToken": csrfToken,
-        "Content-Type": "multipart/form-data"
-      }
-    });
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error.message;
-  }
-};

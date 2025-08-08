@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaHome, FaBuilding, FaFileAlt, FaCalendarAlt, FaRegFileAlt, FaBars } from "react-icons/fa";
+import { FaHome, FaBuilding, FaFileAlt, FaCalendarAlt, FaRegFileAlt, FaBars, FaUsersCog } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
 import {
   Sheet,
@@ -17,7 +17,7 @@ const menu = [
   { name: "Venue Booking", icon: <FaCalendarAlt />, path: "/venueBooking", roles: ["clubmember", "facultyadvisor", "studentcouncil", "admin","ssp"] },
   { name: "Submit Report", icon: <FaRegFileAlt />, path: "/submitReport", roles: ["clubmember", "facultyadvisor", "studentcouncil", "admin","ssp"] },
   { name: "All Clubs", icon: <FaRegFileAlt />, path: "/clubs", roles: ["facultyadvisor", "studentcouncil", "admin","ssp"] },
-  { name: "User Management", icon: <FaRegFileAlt />, path: "/users", roles: ["admin","ssp"] },
+  { name: "RBAC", icon: <FaUsersCog />, path: "/rbac", roles: ["admin","ssp"] },
 ];
 
 export default function Sidebar() {
@@ -62,7 +62,7 @@ export default function Sidebar() {
 
   // Filter menu items based on user role
   const filteredMenu = menu.filter(item =>
-    item.roles.includes(user.username)
+    item.roles.some(role => user.groups.includes(role))
   );
 
   const navContent = (

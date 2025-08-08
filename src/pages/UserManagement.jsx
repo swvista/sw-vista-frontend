@@ -1,372 +1,338 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createUser, getAllUsers, getME, updateUser, deleteUser, getAllClubs } from "../utils/authService";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
 import PageHeader from "../Components/PageHeader";
-
-// Custom hook for responsive Sheet side
-function useMobileSheetSide() {
-  const [isMobile, setIsMobile] = useState(
-    typeof window !== "undefined" ? window.innerWidth < 768 : false
-  );
-  useEffect(() => {
-    function handleResize() {
-      setIsMobile(window.innerWidth < 768);
-    }
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-  return isMobile ? "bottom" : "right";
-}
+import {
+  getAllUsers, getME, updateUser, deleteUser, getAllGroups, createGroup, updateGroup, deleteGroup, getAllPermissions, createUser
+} from "../utils/authService";
+import { toast } from 'react-toastify';
 
 const userCategories = [
-  { key: "clubMember", label: "Club Member", roleId: 4 },
-  { key: "studentCouncil", label: "Student Council", roleId: 5 },
-  { key: "studentWelfare", label: "Student Welfare", roleId: 6 },
-  { key: "facultyAdvisor", label: "Faculty Advisor", roleId: 7 },
-  { key: "securityHead", label: "Security Head", roleId: 8 },
-];
-
-const fieldConfig = {
-  name: { label: "Name", source: "user" },
-  email: { label: "Email", source: "user" },
-  learner_id: { label: "Learner ID", source: "profile" },
-  reg_number: { label: "Registration No.", source: "profile" },
-  club_name: { label: "Club Name", source: "profile" },
-  post: { label: "Post", source: "profile" }, // <-- Added
-  designation: { label: "Designation", source: "profile" },
-  department: { label: "Department", source: "profile" },
-  emp_id: { label: "Employee ID", source: "profile" },
-};
-
-const categoryFields = {
-  clubMember: ["name", "email", "learner_id","post", "reg_number", "club_name"], // <-- Added post here
-  studentCouncil: ["name", "email", "learner_id", "reg_number"],
-  facultyAdvisor: ["name", "email", "designation", "department", "emp_id", "club_name"],
-  studentWelfare: ["name", "email", "designation", "emp_id"],
-  securityHead: ["name", "email", "designation", "emp_id"],
-};
-
-
-const getInitialFormState = (category) => {
-  const state = {};
-  categoryFields[category].forEach(field => {
-    state[field] = "";
-  });
-  return state;
-};
+    { key: "clubMember", label: "Club Member" },
+    { key: "studentCouncil", label: "Student Council" },
+    { key: "studentWelfare", label: "Student Welfare" },
+    { key: "facultyAdvisor", label: "Faculty Advisor" },
+    { key: "securityHead", label: "Security Head" },
+  ];
+  
+  const fieldConfig = {
+    name: { label: "Name", source: "user" },
+    email: { label: "Email", source: "user" },
+    username: { label: "Username", source: "user" },
+    password: { label: "Password", source: "user" },
+    learner_id: { label: "Learner ID", source: "profile" },
+    reg_number: { label: "Registration No.", source: "profile" },
+    club_name: { label: "Club Name", source: "profile" },
+    designation: { label: "Designation", source: "profile" },
+    department: { label: "Department", source: "profile" },
+    emp_id: { label: "Employee ID", source: "profile" },
+  };
+  
+  const categoryFields = {
+    clubMember: ["name", "email", "username", "password", "learner_id", "reg_number", "club_name"],
+    studentCouncil: ["name", "email", "username", "password", "learner_id", "reg_number"],
+    facultyAdvisor: ["name", "email", "username", "password", "designation", "department", "emp_id", "club_name"],
+    studentWelfare: ["name", "email", "username", "password", "designation", "emp_id"],
+    securityHead: ["name", "email", "username", "password", "designation", "emp_id"],
+  };
+  
+  const getInitialFormState = (category) => {
+    const state = {};
+    categoryFields[category].forEach(field => {
+      state[field] = "";
+    });
+    return state;
+  };
 
 export default function UserManagement() {
-  const [activeTab, setActiveTab] = useState("clubMember");
+  const [activeTab, setActiveTab] = useState("users");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [editUser, setEditUser] = useState(null);
-  const [formCategory, setFormCategory] = useState("clubMember");
-  const [formState, setFormState] = useState(getInitialFormState("clubMember"));
-  const [users, setUsers] = useState({
-    clubMember: [],
-    studentCouncil: [],
-    studentWelfare: [],
-    facultyAdvisor: [],
-    securityHead: [],
-  });
-  const [clubs, setClubs] = useState([]); // <-- NEW
-  const [clubsList, setClubsList] = useState([]);
-  const sheetSide = useMobileSheetSide();
+  const [sheetContent, setSheetContent] = useState(null); // 'user', 'role'
+
+  const [users, setUsers] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [permissions, setPermissions] = useState([]);
+  const [selectedRole, setSelectedRole] = useState(null);
+
   const [loggedInUser, setLoggedInUser] = useState({});
 
+  // Form states
+  const [userForm, setUserForm] = useState({ id: null, name: '', email: '', username: '', password: '', groups: [] });
+  const [roleForm, setRoleForm] = useState({ id: null, name: '', permissions: [] });
+  const [formCategory, setFormCategory] = useState("clubMember");
+
   useEffect(() => {
-    fetchUsers();
-    fetchClubs();
+    fetchData();
   }, []);
 
-  const fetchUsers = async () => {
+  const fetchData = async () => {
     try {
-      const me = await getME();
-      setLoggedInUser(me.data);
-      const data = await getAllUsers();
-      const categorized = userCategories.reduce((acc, cat) => {
-        acc[cat.key] = data
-          .filter(u => u.role?.name === cat.key)
-          .map(u => ({ ...u, profile: u.profile || {} }));
-        return acc;
-      }, {});
-      setUsers(categorized);
+      const [meRes, usersRes, rolesRes, permissionsRes] = await Promise.all([
+        getME(),
+        getAllUsers(),
+        getAllGroups(),
+        getAllPermissions()
+      ]);
+      setLoggedInUser(meRes.data);
+      setUsers(usersRes.data);
+      setRoles(rolesRes.data);
+      setPermissions(permissionsRes.data);
+      if (!selectedRole && rolesRes.data && rolesRes.data.length > 0) {
+        setSelectedRole(rolesRes.data[0]);
+      }
     } catch (error) {
-      console.error("Failed to fetch users:", error?.response?.data || error?.message || error);
+      console.error("Failed to fetch data:", error);
+      toast.error("Failed to fetch data");
     }
   };
 
-  // Fetch clubs for dropdown
-  const fetchClubs = async () => {
-    try {
-      const data = await getAllClubs();
-      console.log("Fetched clubs:", data);
-      setClubs(data);
-      setClubsList(data.map(club => ({ value: club.name, label: club.name })));
-    } catch (err) {
-      setClubs([]);
-    }
-  };
+  const permissionOptions = useMemo(() => 
+    Array.isArray(permissions) ? permissions.map(p => ({ value: p.id, label: p.name })) : []
+  , [permissions]);
 
-  const handleInputChange = (e) => {
-    setFormState(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+  const roleOptions = useMemo(() => 
+    Array.isArray(roles) ? roles.map(r => ({ value: r.id, label: r.name })) : []
+  , [roles]);
 
-  const handleCategoryChange = (value) => {
-    setFormCategory(value);
-    setFormState(getInitialFormState(value));
-  };
-
-  const openSheet = (user = null, category = "clubMember") => {
-    setEditUser(user);
-    setFormCategory(category);
-    if (user) {
-      const filled = getInitialFormState(category);
-      categoryFields[category].forEach(field => {
-        if (fieldConfig[field].source === "profile") {
-          filled[field] = user.profile?.[field] || "";
-        } else {
-          filled[field] = user[field] || "";
-        }
-      });
-      setFormState(filled);
-    } else {
-      setFormState(getInitialFormState(category));
+  const openSheet = (type, data = null) => {
+    setSheetContent(type);
+    if (type === 'user') {
+      setUserForm(data ? { ...data, groups: data.groups || [] } : { id: null, name: '', email: '', username: '', password: '', groups: [] });
+    } else if (type === 'role') {
+      setRoleForm(data ? { ...data, permissions: data.permissions || [] } : { id: null, name: '', permissions: [] });
     }
     setIsSheetOpen(true);
   };
 
   const closeSheet = () => {
     setIsSheetOpen(false);
-    setEditUser(null);
-    setFormCategory("clubMember");
-    setFormState(getInitialFormState("clubMember"));
+    setSheetContent(null);
   };
 
-  const handleFormSubmit = async (e) => {
+  const handleUserSubmit = async (e) => {
     e.preventDefault();
-    const missing = categoryFields[formCategory].filter(f => !formState[f]);
-    if (missing.length) {
-      return alert(`Missing required fields: ${missing.join(", ")}`);
-    }
     try {
-      const roleId = userCategories.find(cat => cat.key === formCategory)?.roleId;
-      const payload = {
-        id: editUser?.id,
-        username: formState.name.toLowerCase().replace(/\s/g, ""),
-        name: formState.name,
-        email: formState.email,
-        role: roleId,
-        profile: extractProfile(formState, formCategory),
-      };
-      if (!editUser) {
-        payload.password = "test1234";
-      }
-      if (editUser) {
-        await updateUser(payload, formCategory);
-        alert('User updated successfully!');
+        const profileData = {};
+        const userData = {};
+        categoryFields[formCategory].forEach(field => {
+            if (fieldConfig[field].source === 'profile') {
+                profileData[field] = userForm[field];
+            } else {
+                userData[field] = userForm[field];
+            }
+        });
+
+      const payload = { ...userData, profile: profileData, groups: userForm.groups };
+
+      if (userForm.id) {
+        delete payload.password; // Do not send password on update
+        await updateUser(userForm.id, payload);
+        toast.success("User updated successfully!");
       } else {
         await createUser(payload, formCategory);
-        alert('User created successfully!');
+        toast.success("User created successfully!");
       }
-      await fetchUsers();
+      fetchData();
       closeSheet();
-    } catch (err) {
-      console.error("Operation failed:", err.response?.data || err.message);
-      alert(`Failed to ${editUser ? 'update' : 'create'} user. Check console for details.`);
+    } catch (error) {
+      console.error("User form submission failed:", error);
+      toast.error(error.response?.data?.detail || "An error occurred.");
     }
   };
 
-  const extractProfile = (state, category) => {
-    const profile = {};
-    categoryFields[category].forEach(field => {
-      if (fieldConfig[field].source === "profile") {
-        profile[field] = state[field];
+  const handleRoleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (roleForm.id) {
+        await updateGroup(roleForm.id, roleForm);
+        toast.success("Role updated successfully!");
+      } else {
+        await createGroup(roleForm);
+        toast.success("Role created successfully!");
       }
-    });
-    return profile;
+      fetchData();
+      closeSheet();
+    } catch (error) {
+      console.error("Role form submission failed:", error);
+      toast.error(error.response?.data?.detail || "An error occurred.");
+    }
   };
 
-  const handleDelete = async (user, category) => {
-    if (window.confirm(`Are you sure you want to delete ${user.name}?`)) {
+  const handleDeleteUser = async (userId) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
       try {
-        await deleteUser(user);
-        setUsers(prev => ({
-          ...prev,
-          [category]: prev[category].filter(u => u.id !== user.id)
-        }));
-        alert('User deleted successfully!');
-      } catch (err) {
-        console.error("Delete failed:", err.response?.data || err.message);
-        alert("Failed to delete user. Check console for details.");
+        await deleteUser(userId);
+        fetchData();
+        toast.success("User deleted successfully!");
+      } catch (error) {
+        console.error("Failed to delete user:", error);
+        toast.error("Failed to delete user.");
       }
     }
   };
 
-  // Render form fields
-  const renderFormFields = () => {
-  return categoryFields[formCategory].map(field => {
-    if (field === "club_name") {
-      return (
-        <div key={field}>
-          <label className="block font-medium mb-1">Club</label>
-          <Select
-            value={formState[field] || ""}
-            onValueChange={val =>
-              setFormState(prev => ({ ...prev, [field]: val }))
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select club" />
-            </SelectTrigger>
-            <SelectContent>
-              {clubs.map(club => (
-                <SelectItem key={club.id} value={String(club.id)}>
-                  {club.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      );
+  const handleDeleteRole = async (roleId) => {
+    if (window.confirm("Are you sure you want to delete this role?")) {
+      try {
+        await deleteGroup(roleId);
+        if (selectedRole && selectedRole.id === roleId) {
+            setSelectedRole(roles[0] || null);
+        }
+        fetchData();
+        toast.success("Role deleted successfully!");
+      } catch (error) {
+        console.error("Failed to delete role:", error);
+        toast.error("Failed to delete role.");
+      }
     }
-    // Default input for other fields
-    return (
-      <Input
-        key={field}
-        name={field}
-        value={formState[field] || ""}
-        onChange={handleInputChange}
-        placeholder={fieldConfig[field].label}
-        required
-        className="w-full"
-      />
-    );
-  });
-};
+  };
 
-
-  // Render table headers
-  const renderTableHeaders = (category) => (
-    <>
-      {categoryFields[category].map(field => (
-        <TableHead key={field}>{fieldConfig[field].label}</TableHead>
-      ))}
-      <TableHead>Actions</TableHead>
-    </>
-  );
-
-  // Render table rows
-  const renderTableRows = (category) => (
-    users[category]?.map(user => (
-      <TableRow key={user.id}>
-        {categoryFields[category].map(field => {
-          const value = fieldConfig[field].source === "profile"
-            ? user.profile?.[field] || "-"
-            : user[field] || "-";
-          return <TableCell key={field}>{value}</TableCell>;
-        })}
-        <TableCell>
-          <Button variant="ghost" size="icon" onClick={() => openSheet(user, category)}>
-            <FiEdit2 size={18} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleDelete(user, category)}
-            className="text-red-600 hover:text-red-800"
-          >
-            <FiTrash2 size={18} />
-          </Button>
-        </TableCell>
-      </TableRow>
-    ))
-  );
+  const renderUserFormFields = () => {
+    return categoryFields[formCategory].map(field => (
+        <Input 
+            key={field}
+            name={field} 
+            value={userForm[field] || ''} 
+            onChange={(e) => setUserForm({...userForm, [field]: e.target.value})} 
+            placeholder={fieldConfig[field].label} 
+            required={field !== 'password' && !userForm.id} // Password is not required on edit
+            type={field === 'password' ? 'password' : 'text'}
+        />
+    ));
+  }
 
   return (
     <div className="p-4 sm:p-6 md:p-10 bg-[#faf8ff] min-h-screen">
       <PageHeader user={loggedInUser?.username} />
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="py-3 bg-slate-100 shadow-md flex overflow-auto w-full gap-2">
-            {userCategories.map(type => (
-              <TabsTrigger key={type.key} value={type.key}>{type.label}</TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-        <Button onClick={() => openSheet(null, activeTab)} className="bg-purple-700 hover:bg-purple-600 w-full sm:w-auto">
-          <FiPlus size={18} /> Add User
-        </Button>
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
+            <TabsList className="py-3 bg-slate-100 shadow-md flex overflow-auto w-full gap-2">
+              <TabsTrigger value="users">Users</TabsTrigger>
+              <TabsTrigger value="roles">Roles</TabsTrigger>
+              <TabsTrigger value="permissions">Permissions</TabsTrigger>
+            </TabsList>
+          <Button onClick={() => openSheet(activeTab.slice(0, -1))} className="bg-purple-700 hover:bg-purple-600 w-full sm:w-auto">
+            <FiPlus size={18} /> Add {activeTab.slice(0, -1)}
+          </Button>
+        </div>
 
-      <Tabs value={activeTab}>
-        {userCategories.map(type => (
-          <TabsContent key={type.key} value={type.key}>
-            <Table className="bg-white rounded-md">
-              <TableHeader>
-                <TableRow>
-                  {renderTableHeaders(type.key)}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {renderTableRows(type.key)}
-              </TableBody>
-            </Table>
-          </TabsContent>
-        ))}
+        <TabsContent value="users">
+          <Card>
+            <CardHeader><CardTitle>Users</CardTitle></CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Email</TableHead><TableHead>Roles</TableHead><TableHead>Actions</TableHead></TableRow></TableHeader>
+                <TableBody>
+                  {Array.isArray(users) && users.map(user => (
+                    <TableRow key={user.id}>
+                      <TableCell>{user.name}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>{Array.isArray(user.groups) ? user.groups.map(g => roles.find(r => r.id === g)?.name).join(', ') : ''}</TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="icon" onClick={() => openSheet('user', user)}><FiEdit2 size={18} /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteUser(user.id)} className="text-red-600"><FiTrash2 size={18} /></Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="roles">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="md:col-span-1">
+                    <CardHeader><CardTitle>Roles</CardTitle></CardHeader>
+                    <CardContent>
+                        {Array.isArray(roles) && roles.map(role => (
+                            <div key={role.id} onClick={() => setSelectedRole(role)} className={`p-2 rounded-md cursor-pointer ${selectedRole?.id === role.id ? 'bg-slate-200' : 'hover:bg-slate-100'}`}>
+                                {role.name}
+                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
+                <Card className="md:col-span-2">
+                    <CardHeader>
+                        <CardTitle>{selectedRole?.name}</CardTitle>
+                        <div className="flex gap-2">
+                            <Button variant="outline" size="sm" onClick={() => openSheet('role', selectedRole)}>Edit</Button>
+                            <Button variant="destructive" size="sm" onClick={() => handleDeleteRole(selectedRole.id)}>Delete</Button>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <h3 className="font-semibold mb-2">Permissions</h3>
+                        <div className="space-y-1">
+                        {selectedRole && Array.isArray(selectedRole.permissions) && selectedRole.permissions.map(pid => {
+                            const permission = permissions.find(p => p.id === pid);
+                            return <div key={pid} className="p-2 bg-slate-50 rounded-md">{permission?.name}</div>
+                        })}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </TabsContent>
+
+        <TabsContent value="permissions">
+          <Card>
+            <CardHeader><CardTitle>Permissions</CardTitle></CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader><TableRow><TableHead>Permission Name</TableHead><TableHead>Codename</TableHead></TableRow></TableHeader>
+                <TableBody>
+                  {Array.isArray(permissions) && permissions.map(permission => (
+                    <TableRow key={permission.id}>
+                      <TableCell>{permission.name}</TableCell>
+                      <TableCell>{permission.codename}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       <Sheet open={isSheetOpen} onOpenChange={closeSheet}>
-        <SheetContent side={sheetSide} className="max-w-md w-full px-5">
+        <SheetContent className="max-w-md w-full px-5">
           <SheetHeader>
-            <SheetTitle>{editUser ? "Edit User" : "Create New User"}</SheetTitle>
+            <SheetTitle>{sheetContent === 'user' ? (userForm.id ? 'Edit User' : 'Create User') : (roleForm.id ? 'Edit Role' : 'Create Role')}</SheetTitle>
           </SheetHeader>
-          <form onSubmit={handleFormSubmit} className="space-y-4 mt-4">
-            <label className="block font-medium">User Category</label>
-            <Select
-              value={formCategory}
-              onValueChange={handleCategoryChange}
-              disabled={!!editUser}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                {userCategories.map(cat => (
-                  <SelectItem key={cat.key} value={cat.key}>{cat.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {renderFormFields()}
-            <Button type="submit" className="w-full">
-              {editUser ? "Update User" : "Create User"}
-            </Button>
-          </form>
+          {sheetContent === 'user' && (
+            <form onSubmit={handleUserSubmit} className="space-y-4 mt-4">
+              <Select onValueChange={setFormCategory} defaultValue={formCategory}>
+                <SelectTrigger><SelectValue placeholder="Select user type" /></SelectTrigger>
+                <SelectContent>
+                  {userCategories.map(cat => <SelectItem key={cat.key} value={cat.key}>{cat.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              {renderUserFormFields()}
+              <MultiSelect options={roleOptions} value={userForm.groups} onChange={(selected) => setUserForm({...userForm, groups: selected})} placeholder="Select roles" />
+              <Button type="submit" className="w-full">{userForm.id ? 'Update' : 'Create'} User</Button>
+            </form>
+          )}
+          {sheetContent === 'role' && (
+            <form onSubmit={handleRoleSubmit} className="space-y-4 mt-4">
+              <Input name="name" value={roleForm.name} onChange={(e) => setRoleForm({...roleForm, name: e.target.value})} placeholder="Role Name" required />
+              <MultiSelect options={permissionOptions} value={roleForm.permissions} onChange={(selected) => setRoleForm({...roleForm, permissions: selected})} placeholder="Select permissions" />
+              <Button type="submit" className="w-full">{roleForm.id ? 'Update' : 'Create'} Role</Button>
+            </form>
+          )}
         </SheetContent>
       </Sheet>
     </div>
   );
 }
+
+
+
+
+
+
