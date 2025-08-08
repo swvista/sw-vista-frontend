@@ -61,9 +61,7 @@ export default function Sidebar() {
   }
 
   // Filter menu items based on user role
-  const filteredMenu = menu.filter(item =>
-    item.roles.some(role => user.groups.includes(role))
-  );
+  const filteredMenu = menu; // Temporarily disable role filtering
 
   const navContent = (
     <nav className="mt-2">
