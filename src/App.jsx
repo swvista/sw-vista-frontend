@@ -17,6 +17,17 @@ import SecurityDashboard from "./pages/dashboard/SecurityDashboard";
 import FacultyDashboard from "./pages/dashboard/FacultyDashboard";
 import WelfareDashboard from "./pages/dashboard/WelfareDashboard";
 import UserManagement from "./pages/UserManagement";
+import CreateEvent from "./pages/events/CreateEvent";
+import EventList from "./pages/events/EventList";
+import EditEvent from "./pages/events/EditEvent";
+import EventDetail from "./pages/events/EventDetail";
+import ProposalApproval from "./pages/proposals/ProposalApproval";
+import ProposalsForApproval from "./pages/proposals/ProposalsForApproval";
+import ProposalList from "./pages/proposals/ProposalList";
+import BookingApprovalPage from "./pages/bookings/BookingApprovalPage";
+import BookingReviewPage from "./pages/bookings/BookingReviewPage";
+import ClubDetail from "./pages/ClubDetail";
+import ClubForm from "./pages/ClubForm";
 
 function App() {
   const location = useLocation();
@@ -50,6 +61,18 @@ function App() {
             <Route path="/createProposal" element={<CreateProposal />} />
             <Route path="/venueBooking" element={<VenueBooking />} />
             <Route path="/submitReport" element={<SubmitReport />} />
+            <Route path="/create-event" element={<CreateEvent />} />
+            <Route path="/events" element={<EventList />} />
+            <Route path="/edit-event/:eventId" element={<EditEvent />} />
+            <Route path="/events/:eventId" element={<EventDetail />} />
+            <Route path="/proposals/:proposalId/approve" element={<ProposalApproval />} />
+            <Route path="/proposals-for-approval" element={<ProposalsForApproval />} />
+            <Route path="/proposals" element={<ProposalList />} />
+            <Route path="/bookings-for-approval" element={<BookingApprovalPage />} />
+            <Route path="/bookings/:bookingId/review" element={<BookingReviewPage />} />
+            <Route path="/clubs/:clubId" element={<ClubDetail />} />
+            <Route path="/create-club" element={<ClubForm />} />
+            <Route path="/edit-club/:clubId" element={<ClubForm />} />
           </Routes>
         </div>
       </Theme>

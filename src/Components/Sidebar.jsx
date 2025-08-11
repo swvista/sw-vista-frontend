@@ -15,8 +15,13 @@ const menu = [
   { name: "Venues", icon: <FaBuilding />, path: "/venues", roles: ["facultyadvisor", "studentaouncil", "clubmember", "studentwelfare", "securityhead", "admin","ssp"] },
   { name: "Create Proposal", icon: <FaFileAlt />, path: "/createProposal", roles: ["clubmember", "facultyadvisor", "studentcouncil", "admin","ssp"] },
   { name: "Venue Booking", icon: <FaCalendarAlt />, path: "/venueBooking", roles: ["clubmember", "facultyadvisor", "studentcouncil", "admin","ssp"] },
+  { name: "Create Event", icon: <FaCalendarAlt />, path: "/create-event", roles: ["clubmember", "facultyadvisor", "studentcouncil", "admin", "ssp"] },
+  { name: "Events", icon: <FaCalendarAlt />, path: "/events", roles: ["clubmember", "facultyadvisor", "studentcouncil", "admin", "ssp"] },
   { name: "Submit Report", icon: <FaRegFileAlt />, path: "/submitReport", roles: ["clubmember", "facultyadvisor", "studentcouncil", "admin","ssp"] },
   { name: "All Clubs", icon: <FaRegFileAlt />, path: "/clubs", roles: ["facultyadvisor", "studentcouncil", "admin","ssp"] },
+  { name: "Proposals for Approval", icon: <FaFileAlt />, path: "/proposals-for-approval", roles: ["facultyadvisor", "studentcouncil", "admin","ssp"] },
+  { name: "All Proposals", icon: <FaFileAlt />, path: "/proposals", roles: ["facultyadvisor", "studentcouncil", "admin","ssp"] },
+  { name: "Bookings for Approval", icon: <FaCalendarAlt />, path: "/bookings-for-approval", roles: ["facultyadvisor", "studentcouncil", "admin","ssp"] },
   { name: "RBAC", icon: <FaUsersCog />, path: "/rbac", roles: ["admin","ssp"] },
 ];
 
