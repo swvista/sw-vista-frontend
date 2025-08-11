@@ -9,9 +9,10 @@ import SubmitReport from "./pages/reports/SubmitReports";
 import VenueBooking from "./pages/venues/VenueBooking";
 import Login from "./pages/authentication/Login";
 import CouncilDashboard from "./pages/dashboard/CouncilDashboard";
-import ClubList from "./pages/ClubList";
-import ClubDetails from "./pages/ClubDetails";
-import EditClub from "./pages/EditClub";
+import Clubs from "./pages/Clubs/Clubs";
+import ClubDetails from "./pages/Clubs/ClubDetails";
+import AddClub from "./pages/Clubs/AddClub";
+import EditClub from "./pages/Clubs/EditClub";
 import VenueBookingHistory from "./pages/venues/VenueBookingHistory";
 import SecurityDashboard from "./pages/dashboard/SecurityDashboard";
 import FacultyDashboard from "./pages/dashboard/FacultyDashboard";
@@ -26,8 +27,7 @@ import ProposalsForApproval from "./pages/proposals/ProposalsForApproval";
 import ProposalList from "./pages/proposals/ProposalList";
 import BookingApprovalPage from "./pages/bookings/BookingApprovalPage";
 import BookingReviewPage from "./pages/bookings/BookingReviewPage";
-import ClubDetail from "./pages/ClubDetail";
-import ClubForm from "./pages/ClubForm";
+
 
 function App() {
   const location = useLocation();
@@ -54,10 +54,10 @@ function App() {
 
             <Route path="/venues" element={<VenuePage />} />
             <Route path="/venueBookingHistory" element={<VenueBookingHistory />} />
-            <Route path="/editclub" element={<EditClub />} />
-
-            <Route path="/clubDetails" element={<ClubDetails />} />
-            <Route path="/clubs" element={<ClubList />} />
+            <Route path="/clubs" element={<Clubs />} />
+            <Route path="/clubs/add" element={<AddClub />} />
+            <Route path="/clubs/edit/:id" element={<EditClub />} />
+            <Route path="/clubs/:id" element={<ClubDetails />} />
             <Route path="/createProposal" element={<CreateProposal />} />
             <Route path="/venueBooking" element={<VenueBooking />} />
             <Route path="/submitReport" element={<SubmitReport />} />
@@ -70,9 +70,7 @@ function App() {
             <Route path="/proposals" element={<ProposalList />} />
             <Route path="/bookings-for-approval" element={<BookingApprovalPage />} />
             <Route path="/bookings/:bookingId/review" element={<BookingReviewPage />} />
-            <Route path="/clubs/:clubId" element={<ClubDetail />} />
-            <Route path="/create-club" element={<ClubForm />} />
-            <Route path="/edit-club/:clubId" element={<ClubForm />} />
+            
           </Routes>
         </div>
       </Theme>
