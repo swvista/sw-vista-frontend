@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { MultiSelect } from "@/components/ui/multi-select";
 import PageHeader from "../Components/PageHeader";
 import {
-  getAllUsers, getME, updateUser, deleteUser, getAllGroups, createGroup, updateGroup, deleteGroup, getAllPermissions, createUser
+  getAllUsers, getME, updateUser, deleteUser, getAllGroups, createGroup, updateGroup, deleteGroup, getAllPermissions, createUser, getAllClubs
 } from "../utils/authService";
 import { toast } from 'react-toastify';
 
@@ -29,33 +29,28 @@ const userCategories = [
     password: { label: "Password", source: "user" },
     learner_id: { label: "Learner ID", source: "profile" },
     reg_number: { label: "Registration No.", source: "profile" },
-    club_name: { label: "Club Name", source: "profile" },
+    club: { label: "Club", source: "profile" },
     designation: { label: "Designation", source: "profile" },
     department: { label: "Department", source: "profile" },
     emp_id: { label: "Employee ID", source: "profile" },
   };
   
   const categoryFields = {
-    clubMember: ["name", "email", "username", "password", "learner_id", "reg_number", "club_name"],
+    clubMember: ["name", "email", "username", "password", "learner_id", "reg_number", "club"],
     studentCouncil: ["name", "email", "username", "password", "learner_id", "reg_number"],
-    facultyAdvisor: ["name", "email", "username", "password", "designation", "department", "emp_id", "club_name"],
+    facultyAdvisor: ["name", "email", "username", "password", "designation", "department", "emp_id", "club"],
     studentWelfare: ["name", "email", "username", "password", "designation", "emp_id"],
     securityHead: ["name", "email", "username", "password", "designation", "emp_id"],
   };
   
-  const getInitialFormState = (category) => {
-    const state = {};
-    categoryFields[category].forEach(field => {
-      state[field] = "";
-    });
-    return state;
-  };
+  
 
 export default function UserManagement() {
   const [activeTab, setActiveTab] = useState("users");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [sheetContent, setSheetContent] = useState(null); // 'user', 'role'
 
+  const [clubs, setClubs] = useState([]);
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [permissions, setPermissions] = useState([]);
@@ -68,22 +63,20 @@ export default function UserManagement() {
   const [roleForm, setRoleForm] = useState({ id: null, name: '', permissions: [] });
   const [formCategory, setFormCategory] = useState("clubMember");
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      const [meRes, usersRes, rolesRes, permissionsRes] = await Promise.all([
+      const [meRes, usersRes, rolesRes, permissionsRes, clubsRes] = await Promise.all([
         getME(),
         getAllUsers(),
         getAllGroups(),
-        getAllPermissions()
+        getAllPermissions(),
+        getAllClubs()
       ]);
       setLoggedInUser(meRes.data);
       setUsers(usersRes.data);
       setRoles(rolesRes.data);
       setPermissions(permissionsRes.data);
+      setClubs(clubsRes.data);
       if (!selectedRole && rolesRes.data && rolesRes.data.length > 0) {
         setSelectedRole(rolesRes.data[0]);
       }
@@ -91,7 +84,11 @@ export default function UserManagement() {
       console.error("Failed to fetch data:", error);
       toast.error("Failed to fetch data");
     }
-  };
+  }, [selectedRole, setLoggedInUser, setUsers, setRoles, setPermissions, setClubs, setSelectedRole]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const permissionOptions = useMemo(() => 
     Array.isArray(permissions) ? permissions.map(p => ({ value: p.id, label: p.name })) : []
@@ -195,17 +192,31 @@ export default function UserManagement() {
   };
 
   const renderUserFormFields = () => {
-    return categoryFields[formCategory].map(field => (
-        <Input 
-            key={field}
-            name={field} 
-            value={userForm[field] || ''} 
-            onChange={(e) => setUserForm({...userForm, [field]: e.target.value})} 
-            placeholder={fieldConfig[field].label} 
-            required={field !== 'password' && !userForm.id} // Password is not required on edit
-            type={field === 'password' ? 'password' : 'text'}
-        />
-    ));
+    return categoryFields[formCategory].map(field => {
+        if (field === 'club') {
+            return (
+                <Select key={field} onValueChange={(value) => setUserForm({...userForm, [field]: value})} value={userForm[field] || ''}>
+                    <SelectTrigger><SelectValue placeholder="Select a club" /></SelectTrigger>
+                    <SelectContent>
+                        {clubs.map(club => (
+                            <SelectItem key={club.id} value={club.id}>{club.name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            );
+        }
+        return (
+            <Input 
+                key={field}
+                name={field} 
+                value={userForm[field] || ''} 
+                onChange={(e) => setUserForm({...userForm, [field]: e.target.value})} 
+                placeholder={fieldConfig[field].label} 
+                required={field !== 'password' && !userForm.id} // Password is not required on edit
+                type={field === 'password' ? 'password' : 'text'}
+            />
+        );
+    });
   }
 
   return (
