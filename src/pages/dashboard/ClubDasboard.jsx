@@ -7,7 +7,7 @@ import {
 import Sidebar from "../../Components/Sidebar";
 import React from "react";
 import { MdCheckCircle, MdHistory } from "react-icons/md";
-import ProposalCard from "../proposals/ProposalCard";
+
 import VenueBookingRequestCard from "../venues/VenueBookingRequestCard";
 import PageHeader from "../../Components/PageHeader";
 
@@ -105,7 +105,7 @@ export default function ClubDashboard() {
 
         {/* Recent Venue Booking Requests Table */}
         <SectionCard title="Recent Venue Booking Requests">
-          <ProposalCard />
+          
         </SectionCard>
 
         {/* Active Proposals Card List */}

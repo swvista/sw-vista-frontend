@@ -2,9 +2,9 @@ import "./App.css";
 import { Routes, Route, useLocation } from "react-router-dom";
 import ClubDasboard from "./pages/dashboard/ClubDasboard";
 import { Theme } from "@radix-ui/themes";
-import VenuePage from "./pages/venues/VenuePage";
+import VenueManagement from "./pages/venues/VenueManagement";
 import Sidebar from "./Components/Sidebar";
-import CreateProposal from "./pages/proposals/CreateProposal";
+import ProposalManagement from "./pages/proposals/ProposalManagement";
 import SubmitReport from "./pages/reports/SubmitReports";
 import VenueBooking from "./pages/venues/VenueBooking";
 import Login from "./pages/authentication/Login";
@@ -22,9 +22,7 @@ import CreateEvent from "./pages/events/CreateEvent";
 import EventList from "./pages/events/EventList";
 import EditEvent from "./pages/events/EditEvent";
 import EventDetail from "./pages/events/EventDetail";
-import ProposalApproval from "./pages/proposals/ProposalApproval";
-import ProposalsForApproval from "./pages/proposals/ProposalsForApproval";
-import ProposalList from "./pages/proposals/ProposalList";
+
 import BookingApprovalPage from "./pages/bookings/BookingApprovalPage";
 import BookingReviewPage from "./pages/bookings/BookingReviewPage";
 
@@ -52,22 +50,19 @@ function App() {
 
             <Route path="/rbac" element={<UserManagement />} />
 
-            <Route path="/venues" element={<VenuePage />} />
+            <Route path="/venues" element={<VenueManagement />} />
             <Route path="/venueBookingHistory" element={<VenueBookingHistory />} />
             <Route path="/clubs" element={<Clubs />} />
             <Route path="/clubs/add" element={<AddClub />} />
             <Route path="/clubs/edit/:id" element={<EditClub />} />
             <Route path="/clubs/:id" element={<ClubDetails />} />
-            <Route path="/createProposal" element={<CreateProposal />} />
+            <Route path="/proposals" element={<ProposalManagement />} />
             <Route path="/venueBooking" element={<VenueBooking />} />
             <Route path="/submitReport" element={<SubmitReport />} />
             <Route path="/create-event" element={<CreateEvent />} />
             <Route path="/events" element={<EventList />} />
             <Route path="/edit-event/:eventId" element={<EditEvent />} />
             <Route path="/events/:eventId" element={<EventDetail />} />
-            <Route path="/proposals/:proposalId/approve" element={<ProposalApproval />} />
-            <Route path="/proposals-for-approval" element={<ProposalsForApproval />} />
-            <Route path="/proposals" element={<ProposalList />} />
             <Route path="/bookings-for-approval" element={<BookingApprovalPage />} />
             <Route path="/bookings/:bookingId/review" element={<BookingReviewPage />} />
             

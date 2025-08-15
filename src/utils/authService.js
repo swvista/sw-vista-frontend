@@ -6,14 +6,12 @@ const TOKEN_KEY = 'authToken';
 // Function to get the token from localStorage
 const getToken = () => {
     const token = localStorage.getItem(TOKEN_KEY);
-    console.log('getToken: ', token);
     return token;
 };
 
 // Function to set the token in localStorage
 const setToken = (token) => {
     localStorage.setItem(TOKEN_KEY, token);
-    console.log('setToken: ', token);
 };
 
 // Function to remove the token from localStorage
@@ -62,7 +60,13 @@ export const logout = () => {
 
 export const getME = () => axiosClient.get('api/v1/auth/user/me/');
 
-export const createUser = (userData, userType) => axiosClient.post(`api/v1/auth/user/?type=${userType}`, userData);
+export const createUser = (userData, userType) => {
+  let url = 'api/v1/auth/user/';
+  if (userType) {
+    url += `?type=${userType}`;
+  }
+  return axiosClient.post(url, userData);
+};
 
 export const getAllUsers = () => axiosClient.get('api/v1/auth/user/');
 
@@ -82,7 +86,17 @@ export const getAllPermissions = () => axiosClient.get('api/v1/auth/permission/'
 
 export const getAllVenues = () => axiosClient.get('api/v1/api/venue/');
 
+export const createVenue = (venueData) => axiosClient.post('api/v1/api/venue/', venueData, { headers: { 'Content-Type': 'multipart/form-data' }, withCredentials: true });
+
+export const updateVenue = (venueId, venueData) => axiosClient.put(`api/v1/api/venue/${venueId}/`, venueData, { headers: { 'Content-Type': 'multipart/form-data' }, withCredentials: true });
+
+export const deleteVenue = (venueId) => axiosClient.delete(`api/v1/api/venue/${venueId}/`, { withCredentials: true });
+
 export const createProposal = (proposalData) => axiosClient.post('api/v1/api/proposal/', proposalData);
+
+export const updateProposal = (proposalId, proposalData) => axiosClient.put(`api/v1/api/proposal/${proposalId}/`, proposalData);
+
+export const deleteProposal = (proposalId) => axiosClient.delete(`api/v1/api/proposal/${proposalId}/`);
 
 export const getUserProposals = () => axiosClient.get('api/v1/api/proposal/get_all_proposals_by_user/');
 
@@ -95,6 +109,8 @@ export const deleteVenueBooking = (bookingId) => axiosClient.delete(`api/v1/api/
 export const getApprovedProposals = () => axiosClient.get('api/v1/api/proposal/').then(res => res.data.filter(p => p.status === 1));
 
 export const getVenueBookings = () => axiosClient.get('api/v1/api/booking/');
+
+export const getVenueBookingsByVenueId = (venueId) => axiosClient.get(`api/v1/api/booking/by_venue/${venueId}/`);
 
 export const approveBooking = (bookingId) => axiosClient.post(`api/v1/api/booking-approval/${bookingId}/approve/`, {});
 
