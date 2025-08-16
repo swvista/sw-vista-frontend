@@ -44,7 +44,7 @@ export default function EventList() {
             <PageHeader user={"Username"} />
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold">Events</h1>
-                <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
+                <Button asChild className="text-white">
                     <Link to="/create-event">
                         <FiPlus className="inline-block mr-2" /> Create New Event
                     </Link>

@@ -42,7 +42,8 @@ const BookingForm = ({ venues, proposals, onBookingSuccess, onCancel, editingBoo
     }
   }, [editingBooking, venues]);
 
-  const approvedProposals = proposals.filter((p) => p.status === 1);
+  const approvedProposals = proposals?.filter((p) => p.status === 1) || [];
+
 
   useEffect(() => {
     if (eventType !== "event") setProposal("");

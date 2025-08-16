@@ -85,7 +85,7 @@ export default function CreateEvent() {
                             <textarea
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
-                                className="w-full p-2 border rounded"
+                                className="w-full p-2 border border-gray-200 rounded-md"
                                 rows="4"
                                 required
                             ></textarea>
@@ -143,7 +143,7 @@ export default function CreateEvent() {
                         <div className="flex justify-end">
                             <Button
                                 type="submit"
-                                className="bg-blue-600 hover:bg-blue-700 text-white"
+                                className="text-white"
                                 disabled={loading}
                             >
                                 {loading ? "Creating..." : "Create Event"}

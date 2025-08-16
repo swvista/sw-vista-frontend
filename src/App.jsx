@@ -25,6 +25,7 @@ import EventDetail from "./pages/events/EventDetail";
 
 import BookingApprovalPage from "./pages/bookings/BookingApprovalPage";
 import BookingReviewPage from "./pages/bookings/BookingReviewPage";
+import Dashboard from "./pages/dashboard/Dashboard";
 
 
 function App() {
@@ -37,16 +38,12 @@ function App() {
     <div>
       <Theme>
         {!isLoginPage && <Sidebar />}
-        <div className={isLoginPage ? "w-full ml-0" : "w-[85vw] ml-[15vw] max-sm:ml-0 max-sm:w-full max-lg:ml-0 max-lg:w-full"}>
+        <div className={isLoginPage ? "w-full ml-0" : "w-[85vw] ml-[15vw] bg-[#242424] max-sm:ml-0 max-sm:w-full max-lg:ml-0 max-lg:w-full"}>
           <Routes>
             <Route path="/login" element={<Login />} />
 
             {/* dashboard routes */}
-            <Route path="/clubDashboard" element={<ClubDasboard />} />
-            <Route path="/councilDashboard" element={<CouncilDashboard />} />
-            <Route path="/securityDashboard" element={<SecurityDashboard />} />
-            <Route path="/facultyDashboard" element={<FacultyDashboard />} />
-            <Route path="/welfareDashboard" element={<WelfareDashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
 
             <Route path="/rbac" element={<UserManagement />} />
 

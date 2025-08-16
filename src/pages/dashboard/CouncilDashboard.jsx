@@ -94,7 +94,7 @@ export default function FacultyDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#faf8ff] flex p-10 max-sm:p-5">
+    <div className="min-h-screen bg-[#f4f6f8] flex p-10 max-sm:p-5">
       <div className="w-full">
         {/* <PageHeader user={"Council"} /> */}
 
